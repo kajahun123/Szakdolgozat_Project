@@ -12,18 +12,25 @@ public class TileMap : MonoBehaviour
 
     private void Start()
     {
-        tiles = new int[mapSizeX,mapSizeY];
 
-        //legeneráljuk az összes mezõt és Grass értéket adunk neki (0=grass)
-        for(int x = 0; x < mapSizeX; x++)
+        GenerateMapData();
+        GenerateMapVisuals();
+    }
+
+    public void GenerateMapData()
+    {
+        tiles = new int[mapSizeX, mapSizeY];
+
+        //legeneráljuk az összes mezõt és Grass értéket adunk neki
+        //GRASS = 0
+        //WALL = 1
+        for (int x = 0; x < mapSizeX; x++)
         {
             for (int y = 0; y < mapSizeY; y++)
             {
                 tiles[x, y] = 0;
             }
         }
-
-        GenerateMapVisuals();
     }
 
     public void GenerateMapVisuals()
