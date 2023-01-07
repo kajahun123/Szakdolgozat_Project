@@ -2,17 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Tile : MonoBehaviour
+[System.Serializable]
+public class Tile
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public string name;
+    public GameObject tileVisualPrefab;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    public bool isWalkable = true;
 }
