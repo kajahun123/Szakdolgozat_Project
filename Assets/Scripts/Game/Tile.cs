@@ -7,6 +7,8 @@ public class Tile
 {
     public string name;
     public GameObject tileVisualPrefab;
+    public float movementCost = 1;
+    public GameObject unitOnTile;
 
     public bool isWalkable = true;
 }
