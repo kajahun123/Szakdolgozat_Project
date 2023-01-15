@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UnitScript : MonoBehaviour
 {
@@ -24,7 +26,14 @@ public class UnitScript : MonoBehaviour
     public bool isTurn = false;
     public List<Node> path = null;
 
+    [Header("UI Elements")]
+    public Canvas healthBarCanvas;
+    public TMP_Text hitPointsText;
+    public Image healthBar;
+
+    //Ne léphessen egyszerre több egység
     public Queue<int> movementQueue;
+    public Queue<int> combatQueue;
 
     public TileMap map;
 
@@ -40,11 +49,18 @@ public class UnitScript : MonoBehaviour
     private void Awake()
     {
         x = (int)transform.position.x;
-        y = (int)transform.position.y;
+        y = (int)transform.position.z;
 
         movementQueue = new Queue<int>();
+        combatQueue = new Queue<int>();
         unitMovementState = movementStates.Unselected;
         currentHealthPoints = maxHealthPoints;
+        hitPointsText.SetText(currentHealthPoints.ToString());
+    }
+
+    public void LateUpdate()
+    {
+        healthBarCanvas.transform.forward = Camera.main.transform.forward;
     }
 
     public movementStates GetMovementState(int i)
@@ -115,5 +131,42 @@ public class UnitScript : MonoBehaviour
         tileBeingOccupied.GetComponent<ClickableTile>().unitOnTile = null;
         tileBeingOccupied = map.tilesOnMap[x, y];
         movementQueue.Dequeue();
+    }
+
+    public void GetDamage(int damage)
+    {
+        currentHealthPoints -= damage;
+        updateHealthUI();
+    }
+
+    public void UnitDie()
+    {
+       StartCoroutine(CechkIfRoutinesRunning());
+    }
+
+    public IEnumerator CechkIfRoutinesRunning()
+    {
+        while (combatQueue.Count > 0)
+        {
+            yield return new WaitForEndOfFrame();
+        }
+        isDead = true;
+        hideUnit();
+        GameObject tile = gameObject.GetComponent<UnitScript>().tileBeingOccupied;
+        tile.GetComponent<ClickableTile>().unitOnTile = null;
+        gameObject.GetComponent<UnitScript>().tileBeingOccupied = null;
+        //Destroy(gameObject);
+    }
+
+    public void updateHealthUI()
+    {
+        healthBar.fillAmount = (float)currentHealthPoints / maxHealthPoints;
+        hitPointsText.SetText(currentHealthPoints.ToString());
+    }
+
+    public void hideUnit()
+    {
+        foreach (Transform child in transform)
+            child.gameObject.SetActive(false);
     }
 }

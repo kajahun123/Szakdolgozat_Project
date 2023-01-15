@@ -19,11 +19,13 @@ public class GameManager : MonoBehaviour
     public int cursorX;
     public int cursorY;
 
+    public GameObject team1;
+    public GameObject team2;
+
     public List<GameObject> turnQueue = new List<GameObject>();
 
     public void Start()
     {
-        currentTeam = 0;
         TM = GetComponent<TileMap>();
         addAllUnitsToQueue();
     }
@@ -55,7 +57,7 @@ public class GameManager : MonoBehaviour
                 
                 TM.quadOnMapCursor[selectedXTile, selectedYTile].GetComponent<MeshRenderer>().enabled = true;
                 tileBeingDisplayed = hit.transform.gameObject;
-                Debug.Log("tile1");
+                
             }
             else if (tileBeingDisplayed != hit.transform.gameObject)
             {
@@ -69,7 +71,7 @@ public class GameManager : MonoBehaviour
                 cursorY = selectedYTile;
                 TM.quadOnMapCursor[selectedXTile, selectedYTile].GetComponent<MeshRenderer>().enabled = true;
                 tileBeingDisplayed = hit.transform.gameObject;
-                Debug.Log("tile2");
+                
             }
         }
         else if (hit.transform.parent.CompareTag("Unit"))
@@ -82,7 +84,7 @@ public class GameManager : MonoBehaviour
                 cursorY = selectedYTile;
                 TM.quadOnMapCursor[selectedXTile, selectedYTile].GetComponent<MeshRenderer>().enabled = true;
                 tileBeingDisplayed = hit.transform.parent.gameObject.GetComponent<UnitScript>().tileBeingOccupied;
-                Debug.Log("unit1");
+                
             }
             else if (tileBeingDisplayed != hit.transform.gameObject)
             {
@@ -98,7 +100,7 @@ public class GameManager : MonoBehaviour
                     cursorY = selectedYTile;
                     TM.quadOnMapCursor[selectedXTile, selectedYTile].GetComponent<MeshRenderer>().enabled = true;
                     tileBeingDisplayed = hit.transform.parent.gameObject.GetComponent<UnitScript>().tileBeingOccupied;
-                    Debug.Log("unit2");
+                    
                 }
             }
         }
@@ -107,6 +109,8 @@ public class GameManager : MonoBehaviour
             TM.quadOnMapCursor[selectedXTile, selectedYTile].GetComponent<MeshRenderer>().enabled = false;
         }
     }
+
+    
 
     public void addAllUnitsToQueue()
     {
@@ -118,18 +122,100 @@ public class GameManager : MonoBehaviour
             turnQueue[i] = turnQueue[randomIndex];
             turnQueue[randomIndex] = temp;
         }
+        currentTeam = GetCurrentTeam(turnQueue[0]);
         turnQueue[0].GetComponent<UnitScript>().isTurn = true;
-        TM.SelectUnit(turnQueue[0]);
-        Debug.Log("Starter unit: " + turnQueue[0].GetComponent<UnitScript>().name);
+        TM.SelectUnit(turnQueue[0]);   
     }
 
     public void EndTurn()
     {
         turnQueue[0].GetComponent<UnitScript>().isTurn = false;
+
+        for (int i = 0; i < turnQueue.Count; i++)
+        {
+            if (turnQueue[i].GetComponent<UnitScript>().isDead)
+            {
+                turnQueue.RemoveAt(i);
+                //azért kell csökkenteni az i-t hogy ne ugorjuk át a következõ elemet
+                i--;
+            }
+        }
+
         turnQueue.Add(turnQueue[0]);
         turnQueue.RemoveAt(0);
-
+        currentTeam = GetCurrentTeam(turnQueue[0]);
         turnQueue[0].GetComponent<UnitScript>().isTurn = true;
-        Debug.Log("Next unit: " + turnQueue[0].GetComponent<UnitScript>().name);
+        Debug.Log("CurrentTeam: " + currentTeam);
+        
     }
+
+    public int GetCurrentTeam(GameObject selectedUnit)
+    {
+        return selectedUnit.GetComponent<UnitScript>().team;
+    }
+
+    public GameObject ReturnCurrenTeamGameObject(int team)
+    {
+        GameObject teamToReturn = null;
+        if (team == 0)
+        {
+            teamToReturn = team1;
+        }
+        else if (team == 1)
+        {
+            teamToReturn = team2;
+        }
+
+        return teamToReturn;
+    }
+
+    public void cechkIfUnitsRemain(GameObject unit, GameObject enemy)
+    {
+        StartCoroutine(checkIfUnitsRemainedCoroutine(unit, enemy));
+    }
+
+    public IEnumerator checkIfUnitsRemainedCoroutine(GameObject unit, GameObject enemy)
+    {
+        while (unit.GetComponent<UnitScript>().combatQueue.Count != 0)
+        {
+            yield return new WaitForEndOfFrame();
+        }
+
+        while (enemy.GetComponent<UnitScript>().combatQueue.Count != 0)
+        {
+            yield return new WaitForEndOfFrame();
+        }
+        //Debug.Log("team: " + team1.transform.);
+        bool playerTeamAlive = false;
+        bool enemyTeamAlive = false;
+        foreach (Transform u in team1.transform)
+        {
+            //Debug.Log("Win: " + u.GetComponent<UnitScript>().UnitName);
+            if (!u.GetComponent<UnitScript>().isDead)
+            {
+                playerTeamAlive = true;
+                break;
+            }
+        }
+        foreach (Transform u in team2.transform)
+        {
+            //Debug.Log("Win: " + u.GetComponent<UnitScript>().UnitName);
+            if (!u.GetComponent<UnitScript>().isDead)
+            {
+                enemyTeamAlive = true;
+                break;
+            }
+        }
+
+        if (playerTeamAlive == false)
+        {
+            Debug.Log("Gép nyert");
+        }
+        else if (enemyTeamAlive == false)
+        {
+            Debug.Log("Játékos nyert");
+        }
+    }
+
+
 }
