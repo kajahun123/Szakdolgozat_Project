@@ -145,8 +145,20 @@ public class GameManager : MonoBehaviour
         turnQueue.RemoveAt(0);
         currentTeam = GetCurrentTeam(turnQueue[0]);
         turnQueue[0].GetComponent<UnitScript>().isTurn = true;
-        Debug.Log("CurrentTeam: " + currentTeam);
+        //Debug.Log("CurrentUnit: " + turnQueue[0].GetComponent<UnitScript>().UnitName);
+        TM.SelectUnit(turnQueue[0]);
         
+    }
+
+    public void PreviousTurn()
+    {
+        turnQueue[0].GetComponent<UnitScript>().isTurn = false;
+        turnQueue.Insert(0,turnQueue[turnQueue.Count-1]);
+        turnQueue.RemoveAt(turnQueue.Count-1);
+        currentTeam = GetCurrentTeam(turnQueue[0]);
+        turnQueue[0].GetComponent<UnitScript>().isTurn = true;
+        //Debug.Log("CurrentUnit(previous): " +  turnQueue[0].GetComponent<UnitScript>().UnitName);
+        TM.SelectUnit(turnQueue[0]);
     }
 
     public int GetCurrentTeam(GameObject selectedUnit)
@@ -172,6 +184,7 @@ public class GameManager : MonoBehaviour
     public void cechkIfUnitsRemain(GameObject unit, GameObject enemy)
     {
         StartCoroutine(checkIfUnitsRemainedCoroutine(unit, enemy));
+
     }
 
     public IEnumerator checkIfUnitsRemainedCoroutine(GameObject unit, GameObject enemy)
@@ -209,12 +222,46 @@ public class GameManager : MonoBehaviour
 
         if (playerTeamAlive == false)
         {
-            Debug.Log("Gép nyert");
+            yield return -1;
+        }
+        else if (enemyTeamAlive == false)
+        { 
+            yield return 1;
+        }
+    }
+
+    public int checkWin()
+    {
+        bool playerTeamAlive = false;
+        bool enemyTeamAlive = false;
+        foreach (Transform u in team1.transform)
+        {
+            //Debug.Log("Win: " + u.GetComponent<UnitScript>().UnitName);
+            if (!u.GetComponent<UnitScript>().isDead)
+            {
+                playerTeamAlive = true;
+                break;
+            }
+        }
+        foreach (Transform u in team2.transform)
+        {
+            //Debug.Log("Win: " + u.GetComponent<UnitScript>().UnitName);
+            if (!u.GetComponent<UnitScript>().isDead)
+            {
+                enemyTeamAlive = true;
+                break;
+            }
+        }
+
+        if (playerTeamAlive == false)
+        {
+            return 1;
         }
         else if (enemyTeamAlive == false)
         {
-            Debug.Log("Játékos nyert");
+            return -1;
         }
+        return 0;
     }
 
 

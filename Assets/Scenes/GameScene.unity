@@ -612,6 +612,7 @@ GameObject:
   - component: {fileID: 1832099944}
   - component: {fileID: 1832099943}
   - component: {fileID: 1832099946}
+  - component: {fileID: 1832099947}
   m_Layer: 0
   m_Name: gameManager
   m_TagString: Untagged
@@ -687,6 +688,9 @@ MonoBehaviour:
   greenUIMat: {fileID: 0}
   redUIMat: {fileID: 2100000, guid: ba546d69b1463284fa9686ddb94da70a, type: 2}
   blueUIMat: {fileID: 2100000, guid: 48fd41388d0e1e24d8c979f362651b3b, type: 2}
+  AI: {fileID: 1832099947}
+  tempNode: {fileID: 0}
+  tempTile: {fileID: 0}
 --- !u!4 &1832099945
 Transform:
   m_ObjectHideFlags: 0
@@ -717,6 +721,19 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8383251800ae8d44f83df1c994723e57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GM: {fileID: 1832099943}
+--- !u!114 &1832099947
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1832099942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b545d1c66e9b00d48848afba3499c92c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   GM: {fileID: 1832099943}

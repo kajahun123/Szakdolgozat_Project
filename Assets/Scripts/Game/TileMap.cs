@@ -1,3 +1,4 @@
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -52,6 +53,12 @@ public class TileMap : MonoBehaviour
     public Material redUIMat;
     public Material blueUIMat;
 
+    [Header("AI")]
+    public Minimax AI;
+    public GameObject tempNode;
+    public GameObject tempTile;
+
+
     private void Start()
     {
 
@@ -75,6 +82,7 @@ public class TileMap : MonoBehaviour
             else if (selectedUnit.GetComponent<UnitScript>().unitMovementState == selectedUnit.GetComponent<UnitScript>().GetMovementState(1)
                 && selectedUnit.GetComponent<UnitScript>().movementQueue.Count == 0)
             {
+
                 if (selectTileToDoAction())
                 {
                     
@@ -340,57 +348,75 @@ public class TileMap : MonoBehaviour
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         HashSet<Node> attackableTiles = getUnitAttackOptions();
-        if (Physics.Raycast(ray, out hit))
+
+        if (selectedUnit.GetComponent<UnitScript>().team == 0)
         {
-            if (hit.transform.gameObject.CompareTag("Tile"))
+            if (Physics.Raycast(ray, out hit))
             {
-                int clickedTileX = hit.transform.GetComponent<ClickableTile>().tileX;
-                int clickedTileY = hit.transform.GetComponent<ClickableTile>().tileY;
-                Node nodeToCeck = graph[clickedTileX, clickedTileY];
-               
-                if ((hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile == null || hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile == selectedUnit) && (selectedUnitMoveRange.Contains(nodeToCeck)))
-                {        
-                    generatePathTo(clickedTileX, clickedTileY);
-                    unitSelectedPreviousX = selectedUnit.GetComponent<UnitScript>().x;
-                    unitSelectedPreviousY = selectedUnit.GetComponent<UnitScript>().y;
-                    previousOccupiedTile = selectedUnit.GetComponent<UnitScript>().tileBeingOccupied;
-                    moveUnit();
-                    //finalizeOption();
-                    StartCoroutine(moveUnitAndFinalize());
-                    return true;
-                }
-                if (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile != null && (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().team != selectedUnit.GetComponent<UnitScript>().team) && (attackableTiles.Contains(nodeToCeck)))
+                if (hit.transform.gameObject.CompareTag("Tile"))
                 {
-                    if (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints > 0)
+                    int clickedTileX = hit.transform.GetComponent<ClickableTile>().tileX;
+                    int clickedTileY = hit.transform.GetComponent<ClickableTile>().tileY;
+                    Node nodeToCeck = graph[clickedTileX, clickedTileY];
+
+                    if ((hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile == null || hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile == selectedUnit) && (selectedUnitMoveRange.Contains(nodeToCeck)))
                     {
-                        Debug.Log("Támadás Tile");
-                        StartCoroutine(BM.Attack(selectedUnit, hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile));
-                        Debug.Log("HP: " + hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints);
-                        StartCoroutine(attackUnitAndFinalize(selectedUnit));
-                        
+                        generatePathTo(clickedTileX, clickedTileY);
+                        unitSelectedPreviousX = selectedUnit.GetComponent<UnitScript>().x;
+                        unitSelectedPreviousY = selectedUnit.GetComponent<UnitScript>().y;
+                        previousOccupiedTile = selectedUnit.GetComponent<UnitScript>().tileBeingOccupied;
+                        moveUnit();
+                        //finalizeOption();
+                        StartCoroutine(moveUnitAndFinalize());
                         return true;
-                    } 
+                    }
+                    if (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile != null && (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().team != selectedUnit.GetComponent<UnitScript>().team) && (attackableTiles.Contains(nodeToCeck)))
+                    {
+                        if (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints > 0)
+                        {
+                            Debug.Log("Támadás Tile");
+                            StartCoroutine(BM.Attack(selectedUnit, hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile));
+                            Debug.Log("HP: " + hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints);
+                            StartCoroutine(attackUnitAndFinalize(selectedUnit));
+
+                            return true;
+                        }
+                    }
+
+                }
+                else if (hit.transform.parent.gameObject.CompareTag("Unit"))
+                {
+                    GameObject unitClicked = hit.transform.parent.gameObject;
+                    int unitX = unitClicked.GetComponent<UnitScript>().x;
+                    int unitY = unitClicked.GetComponent<UnitScript>().y;
+                    if (unitClicked.GetComponent<UnitScript>().team != selectedUnit.GetComponent<UnitScript>().team && attackableTiles.Contains(graph[unitX, unitY]))
+                    {
+                        if (unitClicked.GetComponent<UnitScript>().currentHealthPoints > 0)
+                        {
+                            Debug.Log("Támadás Unit");
+                            StartCoroutine(BM.Attack(selectedUnit, unitClicked));
+                            StartCoroutine(attackUnitAndFinalize(selectedUnit));
+                            Debug.Log("HP: " + unitClicked.GetComponent<UnitScript>().currentHealthPoints);
+                            return true;
+                        }
+                    }
                 }
 
             }
-            else if (hit.transform.parent.gameObject.CompareTag("Unit"))
-            {
-                GameObject unitClicked = hit.transform.parent.gameObject;
-                int unitX = unitClicked.GetComponent<UnitScript>().x;
-                int unitY = unitClicked.GetComponent<UnitScript>().y;
-                if (unitClicked.GetComponent<UnitScript>().team != selectedUnit.GetComponent<UnitScript>().team && attackableTiles.Contains(graph[unitX,unitY]))
-                {
-                    if (unitClicked.GetComponent<UnitScript>().currentHealthPoints > 0)
-                    {
-                        Debug.Log("Támadás Unit");
-                        StartCoroutine(BM.Attack(selectedUnit, unitClicked));
-                        StartCoroutine(attackUnitAndFinalize(selectedUnit));
-                        Debug.Log("HP: " + unitClicked.GetComponent<UnitScript>().currentHealthPoints);
-                        return true;
-                    }
-                }
-            }
-            
+        }
+        else if (selectedUnit.GetComponent<UnitScript>().team == 1)
+        {
+            //doMove(findBestMove());
+            Node bestMove = findBestMove();
+            generatePathTo(bestMove.x, bestMove.y);
+            unitSelectedPreviousX = selectedUnit.GetComponent<UnitScript>().x;
+            unitSelectedPreviousY = selectedUnit.GetComponent<UnitScript>().y;
+            previousOccupiedTile = selectedUnit.GetComponent<UnitScript>().tileBeingOccupied;
+            moveUnit();
+            StartCoroutine(moveUnitAndFinalize());
+            Debug.Log("x: " + bestMove.x + ", y: " + bestMove.y);
+            Debug.Log("sikerült az AI lépés");
+            return true;
         }
         return false;
     }
@@ -439,6 +465,8 @@ public class TileMap : MonoBehaviour
         }
         return finalMovementHighlight;
     }
+
+    
 
     public HashSet<Node> getUnitAttackOptions()
     {
@@ -699,6 +727,69 @@ public class TileMap : MonoBehaviour
             currentPath.Reverse();
             selectedUnit.GetComponent<UnitScript>().path = currentPath;
         
+    }
+
+    public void doMove(Node move)
+    {
+        tempNode = tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile;
+        tempTile = selectedUnit.GetComponent<UnitScript>().tileBeingOccupied;
+        tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile = null;
+        tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile = selectedUnit;
+        selectedUnit.GetComponent<UnitScript>().tileBeingOccupied = tilesOnMap[move.x, move.y];
+        //Moved állapotba tesszük
+        selectedUnit.GetComponent<UnitScript>().SetMovementState(2);
+        deselectUnit();
+        GM.EndTurn();
+        
+    }
+
+    //TODO: redo-t megcsinalni
+    public void redoMove(Node move)
+    {
+        deselectUnit();
+        GM.PreviousTurn();
+        tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile = null;
+        tempNode = selectedUnit;
+        selectedUnit.GetComponent<UnitScript>().tileBeingOccupied = tempTile;
+    }
+
+    public Node findBestMove()
+    {
+        HashSet<Node> moves = getActualMovementOptions();
+        double bestScore = double.MinValue;
+        Node bestMove = null;
+        foreach (Node m in moves)
+        {
+            double score = AI.minimax(this, true, 5, double.MinValue, double.MaxValue);
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestMove = m;
+                Debug.Log("Best: " + bestMove.x + ", " + bestMove.y);
+            }
+            Debug.Log("move: " + m.x + ", " + m.y);
+        }
+        Debug.Log("vége");
+        return bestMove;
+    }
+
+    public HashSet<Node> getActualMovementOptions()
+    {
+        HashSet<Node> legalMoves = new HashSet<Node>();
+        Node node;
+        for (int x = 0; x < mapSizeX; x++)
+        {
+            for (int y = 0; y < mapSizeY; y++)
+            {
+                node = graph[x, y];
+                if (selectedUnitMoveRange.Contains(node))
+                {
+                    legalMoves.Add(node);
+                }
+
+            }
+        }
+        return legalMoves;
     }
 
 }
