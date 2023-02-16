@@ -738,7 +738,7 @@ public class TileMap : MonoBehaviour
         
         if (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile != null && tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().team != selectedUnit.GetComponent<UnitScript>().team && attackableTiles.Contains(nodeToCeck))
         {
-            Debug.Log("TÁMAAAAAADÁS");
+            
             if ((tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints > 0))
             {
                 Debug.Log("Támadás Tile");
