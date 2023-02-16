@@ -10,7 +10,7 @@ public class Minimax : MonoBehaviour
     {
         if (depth == 0 || GM.checkWin() != 0)
         {
-            return GM.checkWin() * 10;
+            return GM.evaluateScore(map) ;
         }
         HashSet<Node> moves = map.getActualMovementOptions();
         HashSet<Node> attacks = map.getUnitAttackOptions();
@@ -22,9 +22,12 @@ public class Minimax : MonoBehaviour
             {
                 map.doMove(m);
                 double score = minimax(map, false, depth - 1, alpha, beta);
+                Debug.Log("score :" + score);
+                
                 map.redoMove(m);
                 bestScore = Math.Max(score, bestScore);
                 alpha = Math.Max(alpha, bestScore);
+                Debug.Log("bestscroe: " + bestScore);
                 if (beta <= alpha)
                 {
                     break;

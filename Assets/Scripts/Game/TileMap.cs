@@ -733,9 +733,26 @@ public class TileMap : MonoBehaviour
     {
         tempNode = tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile;
         tempTile = selectedUnit.GetComponent<UnitScript>().tileBeingOccupied;
-        tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile = null;
-        tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile = selectedUnit;
-        selectedUnit.GetComponent<UnitScript>().tileBeingOccupied = tilesOnMap[move.x, move.y];
+        HashSet<Node> attackableTiles = getUnitAttackOptions();
+        Node nodeToCeck = graph[move.x, move.y];
+        
+        if (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile != null && tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().team != selectedUnit.GetComponent<UnitScript>().team && attackableTiles.Contains(nodeToCeck))
+        {
+            Debug.Log("TÁMAAAAAADÁS");
+            if ((tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints > 0))
+            {
+                Debug.Log("Támadás Tile");
+                StartCoroutine(BM.Attack(selectedUnit, (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile)));
+                Debug.Log("HP: " + (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints));
+                StartCoroutine(attackUnitAndFinalize(selectedUnit));
+            }
+        }
+        else if (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile != null)
+        {
+            tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile = null;
+            tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile = selectedUnit;
+            selectedUnit.GetComponent<UnitScript>().tileBeingOccupied = tilesOnMap[move.x, move.y];
+        }
         //Moved állapotba tesszük
         selectedUnit.GetComponent<UnitScript>().SetMovementState(2);
         deselectUnit();
@@ -760,11 +777,13 @@ public class TileMap : MonoBehaviour
         Node bestMove = null;
         foreach (Node m in moves)
         {
-            double score = AI.minimax(this, true, 5, double.MinValue, double.MaxValue);
+            double score = AI.minimax(this, true, 4, double.MinValue, double.MaxValue);
+            
             if (score > bestScore)
             {
                 bestScore = score;
                 bestMove = m;
+                
                 Debug.Log("Best: " + bestMove.x + ", " + bestMove.y);
             }
             Debug.Log("move: " + m.x + ", " + m.y);
@@ -776,13 +795,14 @@ public class TileMap : MonoBehaviour
     public HashSet<Node> getActualMovementOptions()
     {
         HashSet<Node> legalMoves = new HashSet<Node>();
+        Node unitInitialNode = graph[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y];
         Node node;
         for (int x = 0; x < mapSizeX; x++)
         {
             for (int y = 0; y < mapSizeY; y++)
             {
                 node = graph[x, y];
-                if (selectedUnitMoveRange.Contains(node))
+                if (selectedUnitMoveRange.Contains(node) && unitInitialNode != node)
                 {
                     legalMoves.Add(node);
                 }
