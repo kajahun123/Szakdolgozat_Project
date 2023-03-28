@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class TileMap : MonoBehaviour
 {
+
+    //Cloneozható GameState
     public GameManager GM;
     public BattleManager BM;
 
@@ -57,6 +59,9 @@ public class TileMap : MonoBehaviour
     public Minimax AI;
     public GameObject tempNode;
     public GameObject tempTile;
+    public GameObject tempUnit;
+    public GameObject tempEnemy;
+    public int tempHP;
 
 
     private void Start()
@@ -96,6 +101,7 @@ public class TileMap : MonoBehaviour
 
         }
     }
+    
     public void GenerateMapData()
     {
         tiles = new int[mapSizeX, mapSizeY];
@@ -214,6 +220,20 @@ public class TileMap : MonoBehaviour
                 tilesOnMap[unitX, unitY].GetComponent<ClickableTile>().unitOnTile = unitOnTeam.gameObject;
             }
         }
+    }
+
+    public List<GameObject> getAllUnits()
+    {
+        List<GameObject> tempList = new List<GameObject>();
+        foreach (Transform team in unitsOnBoard.transform)
+        {
+
+            foreach (Transform unitOnTeam in team.transform)
+            {
+                tempList.Add(unitOnTeam.gameObject);
+            }
+        }
+        return tempList;
     }
 
     //Egység mozgatása
@@ -412,6 +432,7 @@ public class TileMap : MonoBehaviour
             unitSelectedPreviousX = selectedUnit.GetComponent<UnitScript>().x;
             unitSelectedPreviousY = selectedUnit.GetComponent<UnitScript>().y;
             previousOccupiedTile = selectedUnit.GetComponent<UnitScript>().tileBeingOccupied;
+            Debug.Log("CurrentPath : " + currentPath);
             moveUnit();
             StartCoroutine(moveUnitAndFinalize());
             Debug.Log("x: " + bestMove.x + ", y: " + bestMove.y);
@@ -641,7 +662,7 @@ public class TileMap : MonoBehaviour
 
     public void generatePathTo(int x, int y)
     {
-        
+        Debug.Log("asd");
         //Ugyan oda kattintott mint ahol a unit áll
         if (selectedUnit.GetComponent<UnitScript>().x == x && selectedUnit.GetComponent<UnitScript>().y == y)
         {
@@ -726,31 +747,48 @@ public class TileMap : MonoBehaviour
             //megforditjuk
             currentPath.Reverse();
             selectedUnit.GetComponent<UnitScript>().path = currentPath;
-        
     }
 
     public void doMove(Node move)
     {
-        tempNode = tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile;
-        tempTile = selectedUnit.GetComponent<UnitScript>().tileBeingOccupied;
+
         HashSet<Node> attackableTiles = getUnitAttackOptions();
         Node nodeToCeck = graph[move.x, move.y];
-        
+        tempUnit = selectedUnit;
+
+        Debug.Log((tilesOnMap[move.x, move.y]));
         if (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile != null && tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().team != selectedUnit.GetComponent<UnitScript>().team && attackableTiles.Contains(nodeToCeck))
         {
+            Debug.LogWarning("Támadás");
             
             if ((tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints > 0))
             {
+                tempEnemy = tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile;
+                tempHP = tempEnemy.GetComponent<UnitScript>().currentHealthPoints;
+                tempNode = tilesOnMap[tempEnemy.GetComponent<UnitScript>().x, tempEnemy.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile;
+                tempTile = tempEnemy.GetComponent<UnitScript>().tileBeingOccupied;
                 Debug.Log("Támadás Tile");
-                StartCoroutine(BM.Attack(selectedUnit, (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile)));
+                Debug.Log("Támadó: " + selectedUnit);
+                Debug.Log("Célpont: " + tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile);
+                Debug.Log(BM);
+                BM.Attack(selectedUnit, (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile));
                 Debug.Log("HP: " + (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints));
-                StartCoroutine(attackUnitAndFinalize(selectedUnit));
+                attackUnitAndFinalize(selectedUnit);
+                
             }
         }
-        else if (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile != null)
+        else if (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile == null)
         {
+            
+            tempNode = tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile;
+            Debug.Log("tempnode1: " + tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile);
+            tempTile = selectedUnit.GetComponent<UnitScript>().tileBeingOccupied;
+            Debug.LogWarning("1" + tempTile);
             tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile = null;
+            Debug.LogWarning("selected? " + selectedUnit);
+            Debug.LogWarning("move? " + move.x + " " + move.y);
             tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile = selectedUnit;
+            Debug.LogWarning("tileonmap: " + tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile);
             selectedUnit.GetComponent<UnitScript>().tileBeingOccupied = tilesOnMap[move.x, move.y];
         }
         //Moved állapotba tesszük
@@ -765,18 +803,33 @@ public class TileMap : MonoBehaviour
     {
         deselectUnit();
         GM.PreviousTurn();
-        tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile = null;
-        tempNode = selectedUnit;
-        selectedUnit.GetComponent<UnitScript>().tileBeingOccupied = tempTile;
+        Debug.LogWarning("2" + tempTile);
+        if (tempEnemy != null)
+        {
+            tempEnemy.GetComponent<UnitScript>().currentHealthPoints = tempHP;
+            tempEnemy.GetComponent<UnitScript>().tileBeingOccupied = tempTile;
+            tempNode = tempEnemy;
+            tempEnemy.GetComponent<UnitScript>().isDead = false;
+            tempEnemy.GetComponent<UnitScript>().showUnit();
+        }
+        else
+        {
+            tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile = null;
+            tilesOnMap[tempNode.GetComponent<UnitScript>().x, tempNode.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile = tempNode;
+            Debug.Log("tempnode2: " + tempNode);
+            selectedUnit.GetComponent<UnitScript>().tileBeingOccupied = tempTile;
+        }
     }
 
     public Node findBestMove()
     {
-        HashSet<Node> moves = getActualMovementOptions();
+        HashSet<Node> moves = getActualMovementOptions(selectedUnit);
+        moves.UnionWith(getUnitAttackOptions());
         double bestScore = double.MinValue;
         Node bestMove = null;
         foreach (Node m in moves)
         {
+            Debug.LogWarning(this.selectedUnit);
             double score = AI.minimax(this, true, 4, double.MinValue, double.MaxValue);
             
             if (score > bestScore)
@@ -792,10 +845,12 @@ public class TileMap : MonoBehaviour
         return bestMove;
     }
 
-    public HashSet<Node> getActualMovementOptions()
+    public HashSet<Node> getActualMovementOptions(GameObject unit)
     {
         HashSet<Node> legalMoves = new HashSet<Node>();
-        Node unitInitialNode = graph[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y];
+        Debug.Log("Selected unit: " + selectedUnit + ", x: " + selectedUnit.GetComponent<UnitScript>().y);
+        Debug.Log("unit: " + unit + ", x: " + unit.GetComponent<UnitScript>().y);
+        Node unitInitialNode = graph[unit.GetComponent<UnitScript>().x, unit.GetComponent<UnitScript>().y];
         Node node;
         for (int x = 0; x < mapSizeX; x++)
         {

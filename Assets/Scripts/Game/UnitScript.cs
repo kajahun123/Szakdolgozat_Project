@@ -98,7 +98,6 @@ public class UnitScript : MonoBehaviour
 
     public void MoveToNextTile()
     {
-        Debug.Log(path.Count);
         if(path.Count == 0)
         {
             return;
@@ -168,5 +167,11 @@ public class UnitScript : MonoBehaviour
     {
         foreach (Transform child in transform)
             child.gameObject.SetActive(false);
+    }
+
+    public void showUnit()
+    {
+        foreach (Transform child in transform)
+            child.gameObject.SetActive(true);
     }
 }

@@ -22,10 +22,12 @@ public class GameManager : MonoBehaviour
     public GameObject team1;
     public GameObject team2;
 
-    public List<GameObject> turnQueue = new List<GameObject>();
+    public List<GameObject> playerTurnQueue = new List<GameObject>();
+    public List<GameObject> enemyTurnQueue = new List<GameObject>();
 
     public void Start()
     {
+        currentTeam = 0;
         TM = GetComponent<TileMap>();
         addAllUnitsToQueue();
     }
@@ -38,10 +40,14 @@ public class GameManager : MonoBehaviour
             CursorUiUpdate();
         }
 
-
-        if (turnQueue[0].GetComponent<UnitScript>().isTurn == true)
+       
+        if (playerTurnQueue[0].GetComponent<UnitScript>().isTurn == true)
         {
-            TM.SelectUnit(turnQueue[0]);
+            TM.SelectUnit(playerTurnQueue[0]);
+        }
+        if (enemyTurnQueue[0].GetComponent<UnitScript>().isTurn == true)
+        {
+            TM.SelectUnit(enemyTurnQueue[0]);
         }
     }
     public void CursorUiUpdate()
@@ -110,55 +116,179 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    
-
     public void addAllUnitsToQueue()
     {
-        turnQueue.AddRange(GameObject.FindGameObjectsWithTag("Unit"));
-        for (int i = 0; i < turnQueue.Count; i++)
+        foreach (Transform u in team1.transform)
         {
-            GameObject temp = turnQueue[i];
-            int randomIndex = Random.Range(i, turnQueue.Count);
-            turnQueue[i] = turnQueue[randomIndex];
-            turnQueue[randomIndex] = temp;
+            playerTurnQueue.Add(u.gameObject);
+            
         }
-        currentTeam = GetCurrentTeam(turnQueue[0]);
-        turnQueue[0].GetComponent<UnitScript>().isTurn = true;
-        TM.SelectUnit(turnQueue[0]);   
+        foreach (Transform u in team2.transform)
+        {
+            enemyTurnQueue.Add(u.gameObject);
+        }
+
+        playerTurnQueue[0].GetComponent<UnitScript>().isTurn = true;
+        TM.SelectUnit(playerTurnQueue[0]);
+    }
+
+    /* public void addAllUnitsToQueue()
+     {
+
+         turnQueue.AddRange(GameObject.FindGameObjectsWithTag("Unit"));
+         for (int i = 0; i < turnQueue.Count; i++)
+         {
+             GameObject temp = turnQueue[i];
+             int randomIndex = Random.Range(i, turnQueue.Count);
+             turnQueue[i] = turnQueue[randomIndex];
+             turnQueue[randomIndex] = temp;
+         }
+         currentTeam = GetCurrentTeam(turnQueue[0]);
+         turnQueue[0].GetComponent<UnitScript>().isTurn = true;
+         TM.SelectUnit(turnQueue[0]);   
+     }
+
+     public void EndTurn()
+     {
+         turnQueue[0].GetComponent<UnitScript>().isTurn = false;
+
+         for (int i = 0; i < turnQueue.Count; i++)
+         {
+             if (turnQueue[i].GetComponent<UnitScript>().isDead)
+             {
+                 turnQueue.RemoveAt(i);
+                 //azért kell csökkenteni az i-t hogy ne ugorjuk át a következõ elemet
+                 i--;
+             }
+         }
+
+         turnQueue.Add(turnQueue[0]);
+         turnQueue.RemoveAt(0);
+         currentTeam = GetCurrentTeam(turnQueue[0]);
+         turnQueue[0].GetComponent<UnitScript>().isTurn = true;
+         //Debug.Log("CurrentUnit: " + turnQueue[0].GetComponent<UnitScript>().UnitName);
+         TM.SelectUnit(turnQueue[0]);
+
+     } */
+
+    public void switchCurrentPlayer()
+    {
+        currentTeam++;
+        if (currentTeam == numberOfTeams)
+        {
+            currentTeam = 0;
+        }
+
     }
 
     public void EndTurn()
     {
-        turnQueue[0].GetComponent<UnitScript>().isTurn = false;
-
-        for (int i = 0; i < turnQueue.Count; i++)
+        if (currentTeam == 0)
         {
-            if (turnQueue[i].GetComponent<UnitScript>().isDead)
+            playerTurnQueue[0].GetComponent<UnitScript>().isTurn = false;
+        }
+        else if (currentTeam == 1)
+        {
+            enemyTurnQueue[0].GetComponent<UnitScript>().isTurn = false;
+        }
+
+        switchCurrentPlayer();
+        if (currentTeam == 0)
+        {
+            GameObject selectedUnit;
+            Debug.LogWarning("bent0");
+            playerTurnQueue.Add(playerTurnQueue[0]);
+            playerTurnQueue.RemoveAt(0);
+            for (int i = 0; i < playerTurnQueue.Count; i++)
             {
-                turnQueue.RemoveAt(i);
-                //azért kell csökkenteni az i-t hogy ne ugorjuk át a következõ elemet
-                i--;
+                if (!playerTurnQueue[i].GetComponent<UnitScript>().isDead)
+                {
+                    //playerTurnQueue.RemoveAt(i);
+                    //azért kell csökkenteni az i-t hogy ne ugorjuk át a következõ elemet
+                    // i--;
+                    selectedUnit = playerTurnQueue[i];
+                    selectedUnit.GetComponent<UnitScript>().isTurn = true;
+                    TM.SelectUnit(selectedUnit);
+                    break;
+                }
+                playerTurnQueue.Add(playerTurnQueue[i]);
+                playerTurnQueue.RemoveAt(0);
+            }
+
+        }
+        else if (currentTeam == 1)
+        {
+            GameObject selectedUnit;
+            Debug.LogWarning("bent1");
+            enemyTurnQueue.Add(enemyTurnQueue[0]);
+            enemyTurnQueue.RemoveAt(0);
+            for (int i = 0; i < enemyTurnQueue.Count; i++)
+            {
+                if (!enemyTurnQueue[i].GetComponent<UnitScript>().isDead)
+                {
+                    selectedUnit = enemyTurnQueue[i];
+                    selectedUnit.GetComponent<UnitScript>().isTurn = true;
+                    TM.SelectUnit(selectedUnit);
+                    break;
+                }
+                enemyTurnQueue.Add(enemyTurnQueue[i]);
+                enemyTurnQueue.RemoveAt(0);
             }
         }
 
-        turnQueue.Add(turnQueue[0]);
-        turnQueue.RemoveAt(0);
-        currentTeam = GetCurrentTeam(turnQueue[0]);
-        turnQueue[0].GetComponent<UnitScript>().isTurn = true;
-        //Debug.Log("CurrentUnit: " + turnQueue[0].GetComponent<UnitScript>().UnitName);
-        TM.SelectUnit(turnQueue[0]);
-        
+
     }
 
     public void PreviousTurn()
     {
-        turnQueue[0].GetComponent<UnitScript>().isTurn = false;
-        turnQueue.Insert(0,turnQueue[turnQueue.Count-1]);
-        turnQueue.RemoveAt(turnQueue.Count-1);
-        currentTeam = GetCurrentTeam(turnQueue[0]);
-        turnQueue[0].GetComponent<UnitScript>().isTurn = true;
-        //Debug.Log("CurrentUnit(previous): " +  turnQueue[0].GetComponent<UnitScript>().UnitName);
-        TM.SelectUnit(turnQueue[0]);
+        if (currentTeam == 0)
+        {
+            playerTurnQueue[0].GetComponent<UnitScript>().isTurn = false;
+        }
+        else if (currentTeam == 1)
+        {
+            enemyTurnQueue[0].GetComponent<UnitScript>().isTurn = false;
+        }
+        switchCurrentPlayer();
+        if (currentTeam == 0)
+        {
+            Debug.LogWarning("reset0");
+            GameObject selectedUnit;
+            for (int i = playerTurnQueue.Count - 1; i >= 0; i--)
+            {
+                if (!playerTurnQueue[i].GetComponent<UnitScript>().isDead)
+                {
+                    //playerTurnQueue.RemoveAt(i);
+                    //azért kell csökkenteni az i-t hogy ne ugorjuk át a következõ elemet
+                    // i--;
+                    selectedUnit = playerTurnQueue[i];
+                    playerTurnQueue.Add(playerTurnQueue[0]);
+                    playerTurnQueue.RemoveAt(0);
+                    selectedUnit.GetComponent<UnitScript>().isTurn = true;
+                    playerTurnQueue.Insert(0, selectedUnit);
+                    TM.SelectUnit(selectedUnit);
+                    break;
+                }
+            }
+        }
+        else if (currentTeam == 1)
+        {
+            Debug.LogWarning("reset1");
+            GameObject selectedUnit;
+            for (int i = 0; i < enemyTurnQueue.Count; i++)
+            {
+                if (!enemyTurnQueue[i].GetComponent<UnitScript>().isDead)
+                {
+                    selectedUnit = enemyTurnQueue[i];
+                    enemyTurnQueue.Add(enemyTurnQueue[0]);
+                    enemyTurnQueue.RemoveAt(0);
+                    selectedUnit.GetComponent<UnitScript>().isTurn = true;
+                    enemyTurnQueue.Insert(0, selectedUnit);
+                    TM.SelectUnit(selectedUnit);
+                    break;
+                }
+            }
+        }
     }
 
     public int GetCurrentTeam(GameObject selectedUnit)
@@ -285,7 +415,6 @@ public class GameManager : MonoBehaviour
                 score += 10;
             }
         }
-        Debug.Log("Név: " + map.selectedUnit.GetComponent<UnitScript>().UnitName);
         totalScore = totalScore + score;
         return totalScore;
     }
