@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class State : TileMap
+public class MapState : TileMap
 {
     //TileMap map;
     List<GameObject> units;
@@ -20,7 +20,7 @@ public class State : TileMap
         
     }
 
-    public State(TileMap map)
+    public MapState(TileMap map)
     {
         this.unitsOnBoard = map.unitsOnBoard;
         this.units = map.getAllUnits();

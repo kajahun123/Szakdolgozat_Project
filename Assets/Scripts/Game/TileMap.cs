@@ -1,4 +1,5 @@
 
+using Assets.Scripts.Game;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -213,11 +214,18 @@ public class TileMap : MonoBehaviour
             
             foreach (Transform unitOnTeam in team)
             {
-                
-                int unitX = unitOnTeam.GetComponent<UnitScript>().x;
-                int unitY = unitOnTeam.GetComponent<UnitScript>().y;
-                unitOnTeam.GetComponent<UnitScript>().tileBeingOccupied = tilesOnMap[unitX, unitY];
+                var unit = unitOnTeam.GetComponent<UnitScript>();
+                int unitX = unit.x;
+                int unitY = unit.y;
+                unit.tileBeingOccupied = tilesOnMap[unitX, unitY];
                 tilesOnMap[unitX, unitY].GetComponent<ClickableTile>().unitOnTile = unitOnTeam.gameObject;
+                UnitState unitState = new UnitState();
+                unitState.healthPoint = unit.currentHealthPoints;
+                unitState.occupiedTile = tilesOnMap[unitX, unitY];
+                unitState.x = unitX;
+                unitState.y = unitY;
+                unit.states.Push(unitState);
+
             }
         }
     }
@@ -764,9 +772,11 @@ public class TileMap : MonoBehaviour
             if ((tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints > 0))
             {
                 tempEnemy = tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile;
-                tempHP = tempEnemy.GetComponent<UnitScript>().currentHealthPoints;
-                tempNode = tilesOnMap[tempEnemy.GetComponent<UnitScript>().x, tempEnemy.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile;
-                tempTile = tempEnemy.GetComponent<UnitScript>().tileBeingOccupied;
+                var enemy = tempEnemy.GetComponent<UnitScript>();
+                
+                
+                //tempNode = tilesOnMap[tempEnemy.GetComponent<UnitScript>().x, tempEnemy.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile;
+                //tempTile = tempEnemy.GetComponent<UnitScript>().tileBeingOccupied;
                 Debug.Log("Támadás Tile");
                 Debug.Log("Támadó: " + selectedUnit);
                 Debug.Log("Célpont: " + tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile);
@@ -774,15 +784,22 @@ public class TileMap : MonoBehaviour
                 BM.Attack(selectedUnit, (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile));
                 Debug.Log("HP: " + (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints));
                 attackUnitAndFinalize(selectedUnit);
-                
+                UnitState enemyUnitState = new UnitState();
+                enemyUnitState.healthPoint = enemy.currentHealthPoints;
+                enemyUnitState.occupiedTile = enemy.tileBeingOccupied;
+                enemyUnitState.x = enemy.x;
+                enemyUnitState.x = enemy.y;
+                enemy.states.Push(enemyUnitState);
+
+
             }
         }
         else if (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile == null)
         {
             
-            tempNode = tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile;
+            //tempNode = tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile;
             Debug.Log("tempnode1: " + tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile);
-            tempTile = selectedUnit.GetComponent<UnitScript>().tileBeingOccupied;
+            //tempTile = selectedUnit.GetComponent<UnitScript>().tileBeingOccupied;
             Debug.LogWarning("1" + tempTile);
             tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile = null;
             Debug.LogWarning("selected? " + selectedUnit);
@@ -790,6 +807,14 @@ public class TileMap : MonoBehaviour
             tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile = selectedUnit;
             Debug.LogWarning("tileonmap: " + tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile);
             selectedUnit.GetComponent<UnitScript>().tileBeingOccupied = tilesOnMap[move.x, move.y];
+
+            var unit = selectedUnit.GetComponent<UnitScript>();
+            UnitState selectedUnitState = new UnitState();
+            selectedUnitState.healthPoint = unit.currentHealthPoints;
+            selectedUnitState.occupiedTile = unit.tileBeingOccupied;
+            selectedUnitState.x = unit.x;
+            selectedUnitState.y = unit.y;
+            unit.states.Push(selectedUnitState);
         }
         //Moved állapotba tesszük
         selectedUnit.GetComponent<UnitScript>().SetMovementState(2);
@@ -806,18 +831,31 @@ public class TileMap : MonoBehaviour
         Debug.LogWarning("2" + tempTile);
         if (tempEnemy != null)
         {
-            tempEnemy.GetComponent<UnitScript>().currentHealthPoints = tempHP;
-            tempEnemy.GetComponent<UnitScript>().tileBeingOccupied = tempTile;
-            tempNode = tempEnemy;
+            var enemy = tempEnemy.GetComponent<UnitScript>();
+            var lastState = enemy.states.Peek();
+            enemy.currentHealthPoints = lastState.healthPoint;
+            enemy.tileBeingOccupied = lastState.occupiedTile;
+            enemy.x = lastState.x;
+            enemy.y = lastState.y;
+            //tempNode = tempEnemy;
+            tilesOnMap[enemy.x, enemy.y].GetComponent<ClickableTile>().unitOnTile = tempEnemy;
             tempEnemy.GetComponent<UnitScript>().isDead = false;
             tempEnemy.GetComponent<UnitScript>().showUnit();
+            enemy.states.Pop();
         }
         else
         {
+            var unit = selectedUnit.GetComponent<UnitScript>();
+            var lastState = unit.states.Peek();
+            unit.currentHealthPoints = lastState.healthPoint;
+            unit.tileBeingOccupied = lastState.occupiedTile;
+            unit.x = lastState.y;
+            unit.y = lastState.y;
+            Debug.Log(selectedUnit + " x: " + unit.x + " y: " + unit.y);
             tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile = null;
-            tilesOnMap[tempNode.GetComponent<UnitScript>().x, tempNode.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile = tempNode;
-            Debug.Log("tempnode2: " + tempNode);
-            selectedUnit.GetComponent<UnitScript>().tileBeingOccupied = tempTile;
+            tilesOnMap[unit.x, unit.y].GetComponent<ClickableTile>().unitOnTile = selectedUnit;
+            unit.states.Pop();
+            //selectedUnit.GetComponent<UnitScript>().tileBeingOccupied = tempTile;
         }
     }
 

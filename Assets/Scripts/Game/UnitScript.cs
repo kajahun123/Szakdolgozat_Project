@@ -1,3 +1,4 @@
+using Assets.Scripts.Game;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -36,6 +37,8 @@ public class UnitScript : MonoBehaviour
     public Queue<int> combatQueue;
 
     public TileMap map;
+
+    public Stack<UnitState> states = new Stack<UnitState>();
 
     public enum movementStates
     {
