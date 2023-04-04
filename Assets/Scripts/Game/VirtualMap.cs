@@ -13,6 +13,7 @@ namespace Assets.Scripts.Game
         public int mapSizeX;
         public int mapSizeY;
         public Stack<Step> steps;
+        public UnitScript selectedUnit;
         public VirtualMap(TileMap map, int mapSizeX, int mapSizeY)
         {
             for (int x = 0; x < mapSizeX; x++)
@@ -21,18 +22,35 @@ namespace Assets.Scripts.Game
                 {
                     GameObject tile = map.tilesOnMap[x, y];
                     ClickableTile clickableTile = tile.GetComponent<ClickableTile>();
-                    units[x, y] = clickableTile.unitOnTile.GetComponent<UnitScript>();
-                    units[x, y].states = new Stack<UnitState>();
+                    if (clickableTile.unitOnTile)
+                    {
+                        units[x, y] = clickableTile.unitOnTile.GetComponent<UnitScript>();
+                        units[x, y].states = new Stack<UnitState>();
+                    }
+                    
                 }
             }
 
             this.mapSizeX = mapSizeX;
             this.mapSizeY = mapSizeY;
+            steps = new Stack<Step>();
+
         }
 
         public void doMove(Node node)
         {
-            throw new NotImplementedException();
+
+            //Mozgás
+            
+            UnitState lastState = new UnitState(); //states.Peek()
+            UnitState newState = new UnitState();
+            newState.healthPoint = lastState.healthPoint;
+            newState.x = node.x;
+            newState.y = node.y;
+            selectedUnit.states.Push(newState);
+
+            Step step = new Step(selectedUnit, Step.Type.Move);
+            steps.Push(step);
         }
 
         public HashSet<Node> getActualMovementOptions(GameObject unit)
@@ -47,7 +65,14 @@ namespace Assets.Scripts.Game
 
         public void redoMove(Node node)
         {
-            throw new NotImplementedException();
+            Step lastStep = steps.Peek();
+            selectedUnit = lastStep.unit;
+
+            UnitState lastState = selectedUnit.states.Peek();
+            if (lastStep.type == Step.Type.Move)
+            {
+               
+            }
         }
     }
 }
