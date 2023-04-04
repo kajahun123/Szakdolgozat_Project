@@ -1,3 +1,4 @@
+using Assets.Scripts.Game;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -40,6 +41,19 @@ public class BattleManager : MonoBehaviour
             return;
         }
         battleStatus = false;
+    }
+
+    public void VirtualAttack(GameObject unit, GameObject enemy)
+    {
+        
+        var attackerUnit = unit.GetComponent<UnitScript>();
+        var receiverUnit = enemy.GetComponent<UnitScript>();
+        int attackerDmg = attackerUnit.attackDamage;
+
+        UnitState lastEnemyState = receiverUnit.states.Peek();
+        UnitState newEnemyState = new UnitState();
+        newEnemyState.healthPoint = Mathf.Max(0, lastEnemyState.healthPoint - attackerDmg);
+        receiverUnit.states.Push(newEnemyState);
     }
 
     public bool checkIfUnitIsDead(GameObject unit)

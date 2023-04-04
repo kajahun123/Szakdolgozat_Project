@@ -394,30 +394,7 @@ public class GameManager : MonoBehaviour
         return 0;
     }
 
-    public double evaluateScore(TileMap map)
-    {
-        double totalScore = 0;
-        double score = 0;
-        foreach (Transform u in team1.transform)
-        {
-            if (!u.GetComponent<UnitScript>().isDead)
-            {
-                score -= 10;
-            }
-        }
-        
-        totalScore += score;
-        //AI
-        foreach (Transform u in team2.transform)
-        {
-            if (!u.GetComponent<UnitScript>().isDead)
-            {
-                score += 10;
-            }
-        }
-        totalScore = totalScore + score;
-        return totalScore;
-    }
+    
 
 
 }
