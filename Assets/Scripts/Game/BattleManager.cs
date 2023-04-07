@@ -43,18 +43,7 @@ public class BattleManager : MonoBehaviour
         battleStatus = false;
     }
 
-    public void VirtualAttack(GameObject unit, GameObject enemy)
-    {
-        
-        var attackerUnit = unit.GetComponent<UnitScript>();
-        var receiverUnit = enemy.GetComponent<UnitScript>();
-        int attackerDmg = attackerUnit.attackDamage;
-
-        UnitState lastEnemyState = receiverUnit.states.Peek();
-        UnitState newEnemyState = new UnitState();
-        newEnemyState.healthPoint = Mathf.Max(0, lastEnemyState.healthPoint - attackerDmg);
-        receiverUnit.states.Push(newEnemyState);
-    }
+    
 
     public bool checkIfUnitIsDead(GameObject unit)
     {

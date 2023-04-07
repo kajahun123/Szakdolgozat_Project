@@ -11,15 +11,19 @@ namespace Assets.Scripts.Game
         public enum Type
         {
             Attack,
-            Move
+            Movement
         }
-        public UnitScript unit;
+        public UnitScript changingUnit;
+        public UnitScript attackerUnit;
         public Type type;
+        public int score;
 
-        public Step(UnitScript unit, Type type)
+        public Step(Type type, UnitScript changingUnit, UnitScript attackerUnit = null, int score )
         {
-            this.unit = unit;
+            this.changingUnit = changingUnit;
+            this.attackerUnit = attackerUnit;
             this.type = type;
+            this.score = score;
         }
     }
 }

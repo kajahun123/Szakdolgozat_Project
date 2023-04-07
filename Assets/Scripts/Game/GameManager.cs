@@ -25,11 +25,15 @@ public class GameManager : MonoBehaviour
     public List<GameObject> playerTurnQueue = new List<GameObject>();
     public List<GameObject> enemyTurnQueue = new List<GameObject>();
 
+    public bool isLoggingOn = true;
+    private static bool _isLoggingOn;
+
     public void Start()
     {
         currentTeam = 0;
         TM = GetComponent<TileMap>();
         addAllUnitsToQueue();
+        _isLoggingOn = isLoggingOn;
     }
 
     public void Update()
@@ -50,6 +54,15 @@ public class GameManager : MonoBehaviour
             TM.SelectUnit(enemyTurnQueue[0]);
         }
     }
+
+    public static void Log(string message)
+    {
+        if (_isLoggingOn)
+        {
+            Debug.Log(message);
+        }
+    }
+
     public void CursorUiUpdate()
     {
         if (hit.transform.CompareTag("Tile"))
@@ -178,6 +191,11 @@ public class GameManager : MonoBehaviour
         {
             currentTeam = 0;
         }
+
+    }
+
+    public void nextUnit()
+    {
 
     }
 

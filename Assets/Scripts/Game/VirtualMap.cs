@@ -7,15 +7,17 @@ using UnityEngine;
 
 namespace Assets.Scripts.Game
 {
-    class VirtualMap 
+    class VirtualMap
     {
-        public UnitScript[,] units;
+        public UnitScript[,] table;
         public int mapSizeX;
         public int mapSizeY;
         public Stack<Step> steps;
         public UnitScript selectedUnit;
+        public TileMap originalMap;
         public VirtualMap(TileMap map, int mapSizeX, int mapSizeY)
         {
+            this.originalMap = map;
             for (int x = 0; x < mapSizeX; x++)
             {
                 for (int y = 0; y < mapSizeY; y++)
@@ -24,10 +26,12 @@ namespace Assets.Scripts.Game
                     ClickableTile clickableTile = tile.GetComponent<ClickableTile>();
                     if (clickableTile.unitOnTile)
                     {
-                        units[x, y] = clickableTile.unitOnTile.GetComponent<UnitScript>();
-                        units[x, y].states = new Stack<UnitState>();
+                        table[x, y] = clickableTile.unitOnTile.GetComponent<UnitScript>();
+                        table[x, y].states = new Stack<UnitState>();
+                        UnitState initialState = new UnitState(table[x, y]);
+                        table[x, y].states.Push(initialState);
                     }
-                    
+
                 }
             }
 
@@ -37,42 +41,109 @@ namespace Assets.Scripts.Game
 
         }
 
-        public void doMove(Node node)
+        public void doMove(Position move, UnitScript unit)
         {
-
-            //Mozgás
-            
-            UnitState lastState = new UnitState(); //states.Peek()
-            UnitState newState = new UnitState();
-            newState.healthPoint = lastState.healthPoint;
-            newState.x = node.x;
-            newState.y = node.y;
-            selectedUnit.states.Push(newState);
-
-            Step step = new Step(selectedUnit, Step.Type.Move);
-            steps.Push(step);
-        }
-
-        public HashSet<Node> getActualMovementOptions(GameObject unit)
-        {
-            throw new NotImplementedException();
-        }
-
-        public HashSet<Node> getUnitAttackOptions()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void redoMove(Node node)
-        {
-            Step lastStep = steps.Peek();
-            selectedUnit = lastStep.unit;
-
-            UnitState lastState = selectedUnit.states.Peek();
-            if (lastStep.type == Step.Type.Move)
+            if (table[move.x, move.y] == null)
             {
-               
+                UnitState lastState = unit.states.Peek();
+                UnitState newState = new UnitState(lastState);
+                newState.x = move.x;
+                newState.y = move.y;
+                unit.states.Push(newState);
+                table[lastState.x, lastState.y] = null;
+                table[move.x, move.y] = unit;
+                //függvény: minél közelebb lép a legközelebbi játékoshoz, annál több pont, minél távolabb annál kevesebb
+                Step step = new Step(Step.Type.Movement, unit);
+                steps.Push(step);
+            }
+            else if (table[move.x, move.y] != null && table[move.x, move.y].team != unit.team)
+            {
+                UnitScript target = table[move.x, move.y];
+                VirtualAttack(unit, target);
+                Step step = new Step(Step.Type.Attack, target, unit);
+                steps.Push(step);
             }
         }
+
+        public List<Position> GetMoveOptions(UnitScript unit)
+        {
+            List<Position> legalMoves = new();
+            for (int x = 0; x < mapSizeX; x++)
+            {
+                for (int y = 0; y < mapSizeY; y++)
+                {
+                    if (IsValidMove(unit, x, y))
+                    {
+                        Position move = new Position(x,y);
+                        legalMoves.Add(move);
+                    }
+                }
+            }
+            return legalMoves;
+        }
+
+        public bool IsValidMove(UnitScript unit, int targetX, int targetY) 
+        {
+            int distance = GetDistance(unit.x, unit.y, targetX, targetY);
+            if (distance <= unit.movementRange && IsFieldEmpty(targetX,targetY))
+            {
+                return true;
+            }
+            else if (distance <= unit.attackRange && IsEnemyOnField(unit, targetX, targetY))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public int GetDistance(int startX, int startY, int endX, int endY)
+        {
+            return Math.Abs(endX - startX) + Math.Abs(endY - startY); 
+        }
+
+        public void redoMove()
+        {
+            Step lastStep = steps.Pop();
+            UnitState lastState = lastStep.changingUnit.states.Pop();
+            UnitState currentState = lastStep.changingUnit.states.Peek();
+            if (lastStep.type == Step.Type.Movement)
+            {
+                table[currentState.x, currentState.y] = lastStep.changingUnit;
+                table[lastState.x, lastState.y] = null;
+            }
+            else if (lastStep.type == Step.Type.Attack && lastState.healthPoint <= 0)
+            {
+                table[currentState.x, currentState.y] = lastStep.changingUnit;
+            }
+        }
+
+        public void VirtualAttack(UnitScript attackerUnit, UnitScript targetUnit)
+        {
+            int attackerDmg = attackerUnit.attackDamage;
+
+            UnitState lastEnemyState = targetUnit.states.Peek();
+            UnitState newEnemyState = new UnitState(lastEnemyState);
+            newEnemyState.healthPoint = Mathf.Max(0, lastEnemyState.healthPoint - attackerDmg);
+            targetUnit.states.Push(newEnemyState);
+            if (newEnemyState.healthPoint <= 0)
+            {
+                table[newEnemyState.x, newEnemyState.y] = null;
+            }
+        }
+
+        public bool IsFieldEmpty(int x, int y)
+        {
+            if (table[x, y] != null)
+            {
+                return false;
+            }
+            return originalMap.tilesOnMap[x, y].GetComponent<ClickableTile>().isWalkable;
+        }
+
+        public bool IsEnemyOnField(UnitScript unit, int x, int y)
+        {
+            return table[x, y] != null && table[x, y].team != unit.team;
+        }
+
     }
 }

@@ -136,6 +136,7 @@ public class TileMap : MonoBehaviour
                 newTile.GetComponent<ClickableTile>().tileX = x;
                 newTile.GetComponent<ClickableTile>().tileY = y;
                 newTile.GetComponent<ClickableTile>().map = this;
+                newTile.GetComponent<ClickableTile>().isWalkable = tileTypes[tiles[x, y]].isWalkable;
                 newTile.transform.SetParent(TileContainer.transform);
                 tilesOnMap[x, y] = newTile;
 
@@ -457,7 +458,7 @@ public class TileMap : MonoBehaviour
         HashSet<Node> UIHighlight = new HashSet<Node>();
         HashSet<Node> finalMovementHighlight = new HashSet<Node>();
         HashSet<Node> tempUIHighlight = new HashSet<Node>();
-        int moveSpeed = selectedUnit.GetComponent<UnitScript>().moveSpeed;
+        int moveSpeed = selectedUnit.GetComponent<UnitScript>().movementRange;
         Node unitInitialNode = graph[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y];
 
         finalMovementHighlight.Add(unitInitialNode);

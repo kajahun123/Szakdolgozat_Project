@@ -6,44 +6,29 @@ using UnityEngine;
 
 public class Minimax : MonoBehaviour
 {
-    public GameManager GM;
-   
-
-    public double minimax(TileMap map, bool maxPlayer, int depth, double alpha, double beta) {
+    public double minimax(TileMap map, bool maxPlayer, int depth, double alpha, double beta, UnitScript startUnit) {
         VirtualMap virtualMap = new VirtualMap(map, map.mapSizeX, map.mapSizeY);
-        return minimax_r(virtualMap, maxPlayer, depth, alpha, beta);
+        return minimax_r(virtualMap, maxPlayer, depth, alpha, beta, startUnit);
     }
-    private double minimax_r(VirtualMap map, bool maxPlayer, int depth, double alpha, double beta)
+    private double minimax_r(VirtualMap map, bool maxPlayer, int depth, double alpha, double beta, UnitScript unit)
     {
-        
-        //state.Clone(map);
-        if (depth == 0 || GM.checkWin() != 0)
+        if (depth == 0 || checkWin() != 0)
         {
-            return evaluateScore();
+            return evaluateScore(map.steps);
         }
-        Debug.Log("Min: " + map.selectedUnit.GetComponent<UnitScript>().UnitName);
-        HashSet<Node> moves = map.getActualMovementOptions(map.selectedUnit);
-        HashSet<Node> attacks = map.getUnitAttackOptions();
-        moves.UnionWith(map.getUnitAttackOptions());
+        List<Position> options = map.GetMoveOptions(unit);
 
         if (maxPlayer)
         {
             double bestScore = double.MinValue;
-            foreach (Node m in moves)
+            foreach (Position option in options)
             {
-                Debug.Log("AI");
-                //State state = new State(map);
-                Debug.Log("State1 selected: " + map.selectedUnit.GetComponent<UnitScript>().UnitName);
-                map.doMove(m);
-                Debug.Log("State2 selected: " + map.selectedUnit.GetComponent<UnitScript>().UnitName);
-                
-                double score = minimax_r(map, false, depth - 1, alpha, beta);
-                Debug.Log("score :" + score);
-                Debug.LogWarning("bejut ide???????");
-                map.redoMove(m);
+                GameManager.Log("AI");
+                map.doMove(option, unit);
+                double score = minimax_r(map, false, depth - 1, alpha, beta,);
+                map.redoMove();
                 bestScore = Math.Max(score, bestScore);
                 alpha = Math.Max(alpha, bestScore);
-                Debug.Log("bestscore: " + bestScore);
                 if (beta <= alpha)
                 {
                     break;
@@ -54,14 +39,14 @@ public class Minimax : MonoBehaviour
         else
         {
             double bestScore = double.MaxValue;
-            foreach (Node m in moves)
+            foreach (Position option in options)
             {
                 Debug.Log("Player");
                 //State state = new State(map);
                 Debug.Log("State1 selected: " + map.selectedUnit.GetComponent<UnitScript>().UnitName);
-                map.doMove(m);
+                map.doMove(option, unit);
                 Debug.Log("State2 selected: " + map.selectedUnit.GetComponent<UnitScript>().UnitName);
-                double score = minimax_r(map, true, depth - 1, alpha, beta);
+                double score = minimax_r(map, true, depth - 1, alpha, beta,);
                 
                 map.redoMove(m);
                 bestScore = Math.Min(score, bestScore);
@@ -76,28 +61,17 @@ public class Minimax : MonoBehaviour
         }
     }
 
-    public double evaluateScore()
+    public double evaluateScore(Stack<Step> steps)
     {
         double totalScore = 0;
-        double score = 0;
-        foreach (Transform u in team1.transform)
-        {
-            if (!u.GetComponent<UnitScript>().isDead)
-            {
-                score -= 10;
-            }
-        }
 
-        totalScore += score;
-        //AI
-        foreach (Transform u in team2.transform)
+        //damage +
+        //kapott damage -
+        foreach (Step step in steps)
         {
-            if (!u.GetComponent<UnitScript>().isDead)
-            {
-                score += 10;
-            }
+            totalScore = totalScore + step.score;
         }
-        totalScore = totalScore + score;
+        
         return totalScore;
     }
 }

@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class UnitScript : MonoBehaviour
 {
+    public int orderNumber;
     public int team;
     public int x;
     public int y;
@@ -16,7 +17,7 @@ public class UnitScript : MonoBehaviour
     public GameObject tileBeingOccupied;
 
     public string UnitName;
-    public int moveSpeed = 2;
+    public int movementRange = 2;
     public int attackRange = 1;
     public int attackDamage = 1;
     public int maxHealthPoints = 5;
