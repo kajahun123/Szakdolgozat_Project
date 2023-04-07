@@ -42,13 +42,9 @@ public class Minimax : MonoBehaviour
             foreach (Position option in options)
             {
                 Debug.Log("Player");
-                //State state = new State(map);
-                Debug.Log("State1 selected: " + map.selectedUnit.GetComponent<UnitScript>().UnitName);
                 map.doMove(option, unit);
-                Debug.Log("State2 selected: " + map.selectedUnit.GetComponent<UnitScript>().UnitName);
                 double score = minimax_r(map, true, depth - 1, alpha, beta,);
-                
-                map.redoMove(m);
+                map.redoMove();
                 bestScore = Math.Min(score, bestScore);
                 alpha = Math.Min(alpha, bestScore);
                 if (beta <= alpha)
