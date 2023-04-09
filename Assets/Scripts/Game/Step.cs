@@ -18,7 +18,7 @@ namespace Assets.Scripts.Game
         public Type type;
         public int score;
 
-        public Step(Type type, UnitScript changingUnit,  int score, UnitScript attackerUnit = null, )
+        public Step(Type type, UnitScript changingUnit,  int score, UnitScript attackerUnit = null )
         {
             this.changingUnit = changingUnit;
             this.attackerUnit = attackerUnit;
