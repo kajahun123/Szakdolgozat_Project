@@ -53,17 +53,60 @@ namespace Assets.Scripts.Game
                 table[lastState.x, lastState.y] = null;
                 table[move.x, move.y] = unit;
                 //függvény: minél közelebb lép a legközelebbi játékoshoz, annál több pont, minél távolabb annál kevesebb
-                Step step = new Step(Step.Type.Movement, unit);
+                int movementScore = GetScoreByDistance(unit, table);
+                Step step = new Step(Step.Type.Movement, unit,movementScore);
                 steps.Push(step);
             }
             else if (table[move.x, move.y] != null && table[move.x, move.y].team != unit.team)
             {
                 UnitScript target = table[move.x, move.y];
                 VirtualAttack(unit, target);
-                Step step = new Step(Step.Type.Attack, target, unit);
+                int attackScore = GetScoreByDamage(unit);
+                Step step = new Step(Step.Type.Attack, target,attackScore, unit);
                 steps.Push(step);
             }
         }
+        public int GetScoreByDamage(UnitScript unit)
+        {
+            int attackScore = unit.attackDamage;
+            if (unit.team == 0)
+            {
+                return attackScore *= -1;
+            }
+
+            return attackScore;
+        }
+        public int GetScoreByDistance(UnitScript unit, UnitScript[,] table)
+        {
+            UnitScript closestUnit;
+            int closestDistance = int.MaxValue;
+            for (int x = 0; x < table.Length; x++)
+            {
+                for (int y = 0; y < table.Length; y++)
+                {
+                    //state vagy tényleges x,y?
+                    if(table[x,y] != null)
+                    {
+                        if (GetDistance(unit.x, unit.y, x, y) < closestDistance)
+                        {
+                            closestUnit = table[x, y];
+                            closestDistance = GetDistance(unit.x, unit.y, x, y);
+                        }
+                    }
+                    
+                }
+            }
+            
+            //az AI-nak minél messzebb van annál rosszabb
+            if(unit.team == 1)
+            {
+                return closestDistance * -1;
+            }
+
+            //a játékosnak minél messzebb van annál jobb
+            return closestDistance;   
+        }
+
 
         public List<Position> GetMoveOptions(UnitScript unit)
         {
