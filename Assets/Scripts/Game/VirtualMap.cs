@@ -13,9 +13,23 @@ namespace Assets.Scripts.Game
         public int mapSizeX;
         public int mapSizeY;
         public Stack<Step> steps;
-        public UnitScript selectedUnit;
+        public UnitScript CurrentUnit
+        {
+            get
+            {
+                return currentTeam == Team.Player ? idsToPlayerUnits[currentPlayerId] : idsToAIUnits[currentAIId];
+            }
+        }
         public TileMap originalMap;
-        public VirtualMap(TileMap map, int mapSizeX, int mapSizeY)
+        public int currentAIId;
+        public int currentPlayerId;
+        public Dictionary<int, UnitScript> idsToPlayerUnits;
+        public Dictionary<int, UnitScript> idsToAIUnits;
+        public int maxPlayerId;
+        public int maxAIId;
+        public Team currentTeam;
+
+        public VirtualMap(TileMap map, int mapSizeX, int mapSizeY, int selectedAINumber, int selectedPlayerNumber)
         {
             this.originalMap = map;
             for (int x = 0; x < mapSizeX; x++)
@@ -30,6 +44,23 @@ namespace Assets.Scripts.Game
                         table[x, y].states = new Stack<UnitState>();
                         UnitState initialState = new UnitState(table[x, y]);
                         table[x, y].states.Push(initialState);
+                        if(table[x,y].team == Team.Player)
+                        {
+                            if(table[x, y].id > maxPlayerId)
+                            {
+                                maxPlayerId = table[x, y].id;
+                            }
+
+                            idsToPlayerUnits.Add(table[x, y].id, table[x, y]);
+                        }
+                        else if(table[x,y].team == Team.AI)
+                        {
+                            if (table[x, y].id > maxAIId)
+                            {
+                                maxAIId = table[x, y].id;
+                            }
+                            idsToAIUnits.Add(table[x, y].id, table[x, y]);
+                        }
                     }
 
                 }
@@ -38,7 +69,9 @@ namespace Assets.Scripts.Game
             this.mapSizeX = mapSizeX;
             this.mapSizeY = mapSizeY;
             steps = new Stack<Step>();
-
+            this.currentAIId = selectedAINumber;
+            this.currentPlayerId = selectedPlayerNumber;
+            this.currentTeam = Team.AI;
         }
 
         public void doMove(Position move, UnitScript unit)
@@ -65,20 +98,56 @@ namespace Assets.Scripts.Game
                 Step step = new Step(Step.Type.Attack, target,attackScore, unit);
                 steps.Push(step);
             }
+
+            NextTurn();
         }
+
+        private void NextTurn()
+        {
+            if(currentTeam == Team.AI)
+            {
+                currentTeam = Team.Player;
+                int i = currentPlayerId + 1;
+                while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead )
+                {
+                    if(currentPlayerId == maxPlayerId)
+                    {
+                        i = 0;
+                    }
+                    else
+                    {
+                        i++;
+                    }
+                }
+                currentPlayerId = i;
+            }
+            else if(currentTeam == Team.Player)
+            {
+                currentTeam = Team.AI;
+                int i = currentAIId + 1;
+                while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].IsDead)
+                {
+                    if(currentAIId == maxAIId)
+                    {
+                        i = 0;
+                    }
+                    else
+                    {
+                        i++;
+                    }
+                }
+
+                currentAIId = i;
+            }
+        }
+        
         public int GetScoreByDamage(UnitScript unit)
         {
-            int attackScore = unit.attackDamage;
-            if (unit.team == 0)
-            {
-                return attackScore *= -1;
-            }
-
-            return attackScore;
+            return unit.attackDamage;
         }
+
         public int GetScoreByDistance(UnitScript unit, UnitScript[,] table)
         {
-            UnitScript closestUnit;
             int closestDistance = int.MaxValue;
             for (int x = 0; x < table.Length; x++)
             {
@@ -87,24 +156,14 @@ namespace Assets.Scripts.Game
                     //state vagy tényleges x,y?
                     if(table[x,y] != null)
                     {
-                        if (GetDistance(unit.x, unit.y, x, y) < closestDistance)
+                        if (GetDistance(unit.VX, unit.VY, x, y) < closestDistance)
                         {
-                            closestUnit = table[x, y];
-                            closestDistance = GetDistance(unit.x, unit.y, x, y);
+                            closestDistance = GetDistance(unit.VX, unit.VY, x, y);
                         }
                     }
-                    
                 }
             }
-            
-            //az AI-nak minél messzebb van annál rosszabb
-            if(unit.team == 1)
-            {
-                return closestDistance * -1;
-            }
-
-            //a játékosnak minél messzebb van annál jobb
-            return closestDistance;   
+            return -closestDistance;   
         }
 
 
@@ -127,7 +186,7 @@ namespace Assets.Scripts.Game
 
         public bool IsValidMove(UnitScript unit, int targetX, int targetY) 
         {
-            int distance = GetDistance(unit.x, unit.y, targetX, targetY);
+            int distance = GetDistance(unit.VX, unit.VY, targetX, targetY);
             if (distance <= unit.movementRange && IsFieldEmpty(targetX,targetY))
             {
                 return true;
@@ -186,6 +245,34 @@ namespace Assets.Scripts.Game
         public bool IsEnemyOnField(UnitScript unit, int x, int y)
         {
             return table[x, y] != null && table[x, y].team != unit.team;
+        }
+
+        public bool IsGameOver()
+        {
+            bool teamHasUnit = false;
+            foreach (var idToPlayer in idsToPlayerUnits)
+            {
+                if (!idToPlayer.Value.IsDead)
+                {
+                    teamHasUnit = true;
+                    break;
+                }
+            }
+
+            if (!teamHasUnit)
+            {
+                return true;
+            }
+
+            foreach (var idToAi in idsToAIUnits)
+            {
+                if (!idToAi.Value.IsDead)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
     }

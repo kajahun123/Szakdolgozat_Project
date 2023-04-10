@@ -7,8 +7,8 @@ using UnityEngine.UI;
 
 public class UnitScript : MonoBehaviour
 {
-    public int orderNumber;
-    public int team;
+    public int id;
+    public Team team;
     public int x;
     public int y;
 
@@ -24,7 +24,21 @@ public class UnitScript : MonoBehaviour
     public int currentHealthPoints;
     public Sprite unitSprite;
 
-    public bool isDead = false;
+    public bool IsDead
+    {
+        get
+        {
+            return currentHealthPoints <= 0;
+        }
+    }
+
+    public bool VIsDead
+    {
+        get
+        {
+            return states.Peek().healthPoint <= 0;
+        }
+    }
     public bool isTurn = false;
     public List<Node> path = null;
 
@@ -40,6 +54,21 @@ public class UnitScript : MonoBehaviour
     public TileMap map;
 
     public Stack<UnitState> states = new Stack<UnitState>();
+
+    public int VX
+    {
+        get
+        {
+            return states.Peek().x;
+        }
+    }
+    public int VY
+    {
+        get
+        {
+            return states.Peek().y;
+        }
+    }
 
     public enum movementStates
     {
@@ -153,7 +182,6 @@ public class UnitScript : MonoBehaviour
         {
             yield return new WaitForEndOfFrame();
         }
-        isDead = true;
         hideUnit();
         GameObject tile = gameObject.GetComponent<UnitScript>().tileBeingOccupied;
         tile.GetComponent<ClickableTile>().unitOnTile = null;

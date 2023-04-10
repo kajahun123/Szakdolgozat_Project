@@ -1,3 +1,4 @@
+using Assets.Scripts.Game;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,7 +11,7 @@ public class GameManager : MonoBehaviour
 
     public TileMap TM;
 
-    public int currentTeam;
+    public Team currentTeam;
     public int numberOfTeams = 2;
 
     public int selectedXTile;
@@ -186,10 +187,13 @@ public class GameManager : MonoBehaviour
 
     public void switchCurrentPlayer()
     {
-        currentTeam++;
-        if (currentTeam == numberOfTeams)
+        if(currentTeam == Team.Player)
         {
-            currentTeam = 0;
+            currentTeam = Team.AI;
+        }
+        else if(currentTeam == Team.AI)
+        {
+            currentTeam = Team.Player;
         }
 
     }
@@ -201,17 +205,17 @@ public class GameManager : MonoBehaviour
 
     public void EndTurn()
     {
-        if (currentTeam == 0)
+        if (currentTeam == Team.Player)
         {
             playerTurnQueue[0].GetComponent<UnitScript>().isTurn = false;
         }
-        else if (currentTeam == 1)
+        else if (currentTeam == Team.AI)
         {
             enemyTurnQueue[0].GetComponent<UnitScript>().isTurn = false;
         }
 
         switchCurrentPlayer();
-        if (currentTeam == 0)
+        if (currentTeam == Team.Player)
         {
             GameObject selectedUnit;
             Debug.LogWarning("bent0");
@@ -219,7 +223,7 @@ public class GameManager : MonoBehaviour
             playerTurnQueue.RemoveAt(0);
             for (int i = 0; i < playerTurnQueue.Count; i++)
             {
-                if (!playerTurnQueue[i].GetComponent<UnitScript>().isDead)
+                if (!playerTurnQueue[i].GetComponent<UnitScript>().IsDead)
                 {
                     //playerTurnQueue.RemoveAt(i);
                     //azért kell csökkenteni az i-t hogy ne ugorjuk át a következõ elemet
@@ -234,7 +238,7 @@ public class GameManager : MonoBehaviour
             }
 
         }
-        else if (currentTeam == 1)
+        else if (currentTeam == Team.AI)
         {
             GameObject selectedUnit;
             Debug.LogWarning("bent1");
@@ -242,7 +246,7 @@ public class GameManager : MonoBehaviour
             enemyTurnQueue.RemoveAt(0);
             for (int i = 0; i < enemyTurnQueue.Count; i++)
             {
-                if (!enemyTurnQueue[i].GetComponent<UnitScript>().isDead)
+                if (!enemyTurnQueue[i].GetComponent<UnitScript>().IsDead)
                 {
                     selectedUnit = enemyTurnQueue[i];
                     selectedUnit.GetComponent<UnitScript>().isTurn = true;
@@ -259,22 +263,22 @@ public class GameManager : MonoBehaviour
 
     public void PreviousTurn()
     {
-        if (currentTeam == 0)
+        if (currentTeam == Team.Player)
         {
             playerTurnQueue[0].GetComponent<UnitScript>().isTurn = false;
         }
-        else if (currentTeam == 1)
+        else if (currentTeam == Team.AI)
         {
             enemyTurnQueue[0].GetComponent<UnitScript>().isTurn = false;
         }
         switchCurrentPlayer();
-        if (currentTeam == 0)
+        if (currentTeam == Team.Player)
         {
             Debug.LogWarning("reset0");
             GameObject selectedUnit;
             for (int i = playerTurnQueue.Count - 1; i >= 0; i--)
             {
-                if (!playerTurnQueue[i].GetComponent<UnitScript>().isDead)
+                if (!playerTurnQueue[i].GetComponent<UnitScript>().IsDead)
                 {
                     //playerTurnQueue.RemoveAt(i);
                     //azért kell csökkenteni az i-t hogy ne ugorjuk át a következõ elemet
@@ -289,13 +293,13 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-        else if (currentTeam == 1)
+        else if (currentTeam == Team.AI)
         {
             Debug.LogWarning("reset1");
             GameObject selectedUnit;
             for (int i = 0; i < enemyTurnQueue.Count; i++)
             {
-                if (!enemyTurnQueue[i].GetComponent<UnitScript>().isDead)
+                if (!enemyTurnQueue[i].GetComponent<UnitScript>().IsDead)
                 {
                     selectedUnit = enemyTurnQueue[i];
                     enemyTurnQueue.Add(enemyTurnQueue[0]);
@@ -309,7 +313,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public int GetCurrentTeam(GameObject selectedUnit)
+    public Team GetCurrentTeam(GameObject selectedUnit)
     {
         return selectedUnit.GetComponent<UnitScript>().team;
     }
@@ -352,7 +356,7 @@ public class GameManager : MonoBehaviour
         foreach (Transform u in team1.transform)
         {
             //Debug.Log("Win: " + u.GetComponent<UnitScript>().UnitName);
-            if (!u.GetComponent<UnitScript>().isDead)
+            if (!u.GetComponent<UnitScript>().IsDead)
             {
                 playerTeamAlive = true;
                 break;
@@ -361,7 +365,7 @@ public class GameManager : MonoBehaviour
         foreach (Transform u in team2.transform)
         {
             //Debug.Log("Win: " + u.GetComponent<UnitScript>().UnitName);
-            if (!u.GetComponent<UnitScript>().isDead)
+            if (!u.GetComponent<UnitScript>().IsDead)
             {
                 enemyTeamAlive = true;
                 break;
@@ -385,7 +389,7 @@ public class GameManager : MonoBehaviour
         foreach (Transform u in team1.transform)
         {
             //Debug.Log("Win: " + u.GetComponent<UnitScript>().UnitName);
-            if (!u.GetComponent<UnitScript>().isDead)
+            if (!u.GetComponent<UnitScript>().IsDead)
             {
                 playerTeamAlive = true;
                 break;
@@ -394,7 +398,7 @@ public class GameManager : MonoBehaviour
         foreach (Transform u in team2.transform)
         {
             //Debug.Log("Win: " + u.GetComponent<UnitScript>().UnitName);
-            if (!u.GetComponent<UnitScript>().isDead)
+            if (!u.GetComponent<UnitScript>().IsDead)
             {
                 enemyTeamAlive = true;
                 break;

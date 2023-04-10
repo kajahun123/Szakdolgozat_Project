@@ -221,12 +221,6 @@ public class TileMap : MonoBehaviour
                 int unitY = unit.y;
                 unit.tileBeingOccupied = tilesOnMap[unitX, unitY];
                 tilesOnMap[unitX, unitY].GetComponent<ClickableTile>().unitOnTile = unitOnTeam.gameObject;
-                UnitState unitState = new UnitState();
-                unitState.healthPoint = unit.currentHealthPoints;
-                unitState.occupiedTile = tilesOnMap[unitX, unitY];
-                unitState.x = unitX;
-                unitState.y = unitY;
-                unit.states.Push(unitState);
 
             }
         }
@@ -434,7 +428,7 @@ public class TileMap : MonoBehaviour
 
             }
         }
-        else if (selectedUnit.GetComponent<UnitScript>().team == 1)
+        else if (selectedUnit.GetComponent<UnitScript>().team == Team.AI)
         {
             //doMove(findBestMove());
             Node bestMove = findBestMove();
@@ -759,108 +753,6 @@ public class TileMap : MonoBehaviour
             selectedUnit.GetComponent<UnitScript>().path = currentPath;
     }
 
-    public void doMove(Node move)
-    {
-
-        HashSet<Node> attackableTiles = getUnitAttackOptions();
-        Node nodeToCeck = graph[move.x, move.y];
-        tempUnit = selectedUnit;
-
-        Debug.Log((tilesOnMap[move.x, move.y]));
-        if (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile != null && tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().team != selectedUnit.GetComponent<UnitScript>().team && attackableTiles.Contains(nodeToCeck))
-        {
-            Debug.LogWarning("Támadás");
-            
-            if ((tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints > 0))
-            {
-                tempEnemy = tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile;
-                var enemy = tempEnemy.GetComponent<UnitScript>();
-                
-                
-                //tempNode = tilesOnMap[tempEnemy.GetComponent<UnitScript>().x, tempEnemy.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile;
-                //tempTile = tempEnemy.GetComponent<UnitScript>().tileBeingOccupied;
-                Debug.Log("Támadás Tile");
-                Debug.Log("Támadó: " + selectedUnit);
-                Debug.Log("Célpont: " + tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile);
-                Debug.Log(BM);
-                BM.Attack(selectedUnit, (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile));
-                Debug.Log("HP: " + (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints));
-                attackUnitAndFinalize(selectedUnit);
-                UnitState enemyUnitState = new UnitState();
-                enemyUnitState.healthPoint = enemy.currentHealthPoints;
-                enemyUnitState.occupiedTile = enemy.tileBeingOccupied;
-                enemyUnitState.x = enemy.x;
-                enemyUnitState.x = enemy.y;
-                enemy.states.Push(enemyUnitState);
-
-
-            }
-        }
-        else if (tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile == null)
-        {
-            
-            //tempNode = tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile;
-            Debug.Log("tempnode1: " + tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile);
-            //tempTile = selectedUnit.GetComponent<UnitScript>().tileBeingOccupied;
-            Debug.LogWarning("1" + tempTile);
-            tilesOnMap[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y].GetComponent<ClickableTile>().unitOnTile = null;
-            Debug.LogWarning("selected? " + selectedUnit);
-            Debug.LogWarning("move? " + move.x + " " + move.y);
-            tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile = selectedUnit;
-            Debug.LogWarning("tileonmap: " + tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile);
-            selectedUnit.GetComponent<UnitScript>().tileBeingOccupied = tilesOnMap[move.x, move.y];
-
-            var unit = selectedUnit.GetComponent<UnitScript>();
-            UnitState selectedUnitState = new UnitState();
-            selectedUnitState.healthPoint = unit.currentHealthPoints;
-            selectedUnitState.occupiedTile = unit.tileBeingOccupied;
-            selectedUnitState.x = unit.x;
-            selectedUnitState.y = unit.y;
-            unit.states.Push(selectedUnitState);
-        }
-        //Moved állapotba tesszük
-        selectedUnit.GetComponent<UnitScript>().SetMovementState(2);
-        deselectUnit();
-        GM.EndTurn();
-        
-    }
-
-    //TODO: redo-t megcsinalni
-    public void redoMove(Node move)
-    {
-        deselectUnit();
-        GM.PreviousTurn();
-        Debug.LogWarning("2" + tempTile);
-        if (tempEnemy != null)
-        {
-            var enemy = tempEnemy.GetComponent<UnitScript>();
-            var lastState = enemy.states.Peek();
-            enemy.currentHealthPoints = lastState.healthPoint;
-            enemy.tileBeingOccupied = lastState.occupiedTile;
-            enemy.x = lastState.x;
-            enemy.y = lastState.y;
-            //tempNode = tempEnemy;
-            tilesOnMap[enemy.x, enemy.y].GetComponent<ClickableTile>().unitOnTile = tempEnemy;
-            tempEnemy.GetComponent<UnitScript>().isDead = false;
-            tempEnemy.GetComponent<UnitScript>().showUnit();
-            enemy.states.Pop();
-        }
-        else
-        {
-            var unit = selectedUnit.GetComponent<UnitScript>();
-            var lastState = unit.states.Peek();
-            unit.currentHealthPoints = lastState.healthPoint;
-            unit.tileBeingOccupied = lastState.occupiedTile;
-            unit.x = lastState.y;
-            unit.y = lastState.y;
-            Debug.Log(selectedUnit + " x: " + unit.x + " y: " + unit.y);
-            tilesOnMap[move.x, move.y].GetComponent<ClickableTile>().unitOnTile = null;
-            tilesOnMap[unit.x, unit.y].GetComponent<ClickableTile>().unitOnTile = selectedUnit;
-            unit.states.Pop();
-            //selectedUnit.GetComponent<UnitScript>().tileBeingOccupied = tempTile;
-        }
-    }
-
     public Node findBestMove()
     {
         HashSet<Node> moves = getActualMovementOptions(selectedUnit);
@@ -870,7 +762,7 @@ public class TileMap : MonoBehaviour
         foreach (Node m in moves)
         {
             Debug.LogWarning(this.selectedUnit);
-            double score = AI.minimax(this, true, 4, double.MinValue, double.MaxValue);
+            double score = AI.minimax(this, true, 4, double.MinValue, double.MaxValue, selectedUnit.GetComponent<UnitScript>());
             
             if (score > bestScore)
             {
