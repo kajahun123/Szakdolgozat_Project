@@ -29,12 +29,22 @@ public class GameManager : MonoBehaviour
     public bool isLoggingOn = true;
     private static bool _isLoggingOn;
 
+    public int currentPlayerId;
+    public int currentAIId;
+
+    public Dictionary<int, UnitScript> idsToPlayerUnits;
+    public Dictionary<int, UnitScript> idsToAIUnits;
+
+    public int maxPlayerId;
+    public int maxAIId;
+
     public void Start()
     {
-        currentTeam = 0;
+        currentTeam = Team.Player;
         TM = GetComponent<TileMap>();
-        addAllUnitsToQueue();
+        //addAllUnitsToQueue();
         _isLoggingOn = isLoggingOn;
+        addAllUnitToQueue();
     }
 
     public void Update()
@@ -45,7 +55,7 @@ public class GameManager : MonoBehaviour
             CursorUiUpdate();
         }
 
-       
+       /*
         if (playerTurnQueue[0].GetComponent<UnitScript>().isTurn == true)
         {
             TM.SelectUnit(playerTurnQueue[0]);
@@ -53,7 +63,7 @@ public class GameManager : MonoBehaviour
         if (enemyTurnQueue[0].GetComponent<UnitScript>().isTurn == true)
         {
             TM.SelectUnit(enemyTurnQueue[0]);
-        }
+        }*/
     }
 
     public static void Log(string message)
@@ -130,7 +140,36 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void addAllUnitsToQueue()
+    public void addAllUnitToQueue()
+    {
+        foreach (Transform u in team1.transform)
+        {
+            UnitScript unit = u.gameObject.GetComponent<UnitScript>();
+            if (unit.id > maxPlayerId)
+            {
+                maxPlayerId = unit.id;
+            }
+
+            idsToPlayerUnits.Add(unit.id, unit);
+
+        }
+        foreach (Transform u in team2.transform)
+        {
+            UnitScript unit = u.gameObject.GetComponent<UnitScript>();
+            if (unit.id > maxPlayerId)
+            {
+                maxAIId = unit.id;
+            }
+
+            idsToAIUnits.Add(unit.id, unit);
+        }
+
+        idsToPlayerUnits[0].isTurn = true;
+        //gameobjectbe rakni
+        TM.SelectUnit(idsToPlayerUnits[0]);
+    }
+
+    /*public void addAllUnitsToQueue()
     {
         foreach (Transform u in team1.transform)
         {
@@ -144,46 +183,7 @@ public class GameManager : MonoBehaviour
 
         playerTurnQueue[0].GetComponent<UnitScript>().isTurn = true;
         TM.SelectUnit(playerTurnQueue[0]);
-    }
-
-    /* public void addAllUnitsToQueue()
-     {
-
-         turnQueue.AddRange(GameObject.FindGameObjectsWithTag("Unit"));
-         for (int i = 0; i < turnQueue.Count; i++)
-         {
-             GameObject temp = turnQueue[i];
-             int randomIndex = Random.Range(i, turnQueue.Count);
-             turnQueue[i] = turnQueue[randomIndex];
-             turnQueue[randomIndex] = temp;
-         }
-         currentTeam = GetCurrentTeam(turnQueue[0]);
-         turnQueue[0].GetComponent<UnitScript>().isTurn = true;
-         TM.SelectUnit(turnQueue[0]);   
-     }
-
-     public void EndTurn()
-     {
-         turnQueue[0].GetComponent<UnitScript>().isTurn = false;
-
-         for (int i = 0; i < turnQueue.Count; i++)
-         {
-             if (turnQueue[i].GetComponent<UnitScript>().isDead)
-             {
-                 turnQueue.RemoveAt(i);
-                 //azért kell csökkenteni az i-t hogy ne ugorjuk át a következõ elemet
-                 i--;
-             }
-         }
-
-         turnQueue.Add(turnQueue[0]);
-         turnQueue.RemoveAt(0);
-         currentTeam = GetCurrentTeam(turnQueue[0]);
-         turnQueue[0].GetComponent<UnitScript>().isTurn = true;
-         //Debug.Log("CurrentUnit: " + turnQueue[0].GetComponent<UnitScript>().UnitName);
-         TM.SelectUnit(turnQueue[0]);
-
-     } */
+    }*/
 
     public void switchCurrentPlayer()
     {
@@ -261,55 +261,46 @@ public class GameManager : MonoBehaviour
 
     }
 
-    public void PreviousTurn()
+    private void NextTurn()
     {
-        if (currentTeam == Team.Player)
+        if (currentTeam == Team.AI)
         {
-            playerTurnQueue[0].GetComponent<UnitScript>().isTurn = false;
-        }
-        else if (currentTeam == Team.AI)
-        {
-            enemyTurnQueue[0].GetComponent<UnitScript>().isTurn = false;
-        }
-        switchCurrentPlayer();
-        if (currentTeam == Team.Player)
-        {
-            Debug.LogWarning("reset0");
-            GameObject selectedUnit;
-            for (int i = playerTurnQueue.Count - 1; i >= 0; i--)
+            currentTeam = Team.Player;
+            int i = currentPlayerId + 1;
+            while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead)
             {
-                if (!playerTurnQueue[i].GetComponent<UnitScript>().IsDead)
+                if (currentPlayerId == maxPlayerId)
                 {
-                    //playerTurnQueue.RemoveAt(i);
-                    //azért kell csökkenteni az i-t hogy ne ugorjuk át a következõ elemet
-                    // i--;
-                    selectedUnit = playerTurnQueue[i];
-                    playerTurnQueue.Add(playerTurnQueue[0]);
-                    playerTurnQueue.RemoveAt(0);
-                    selectedUnit.GetComponent<UnitScript>().isTurn = true;
-                    playerTurnQueue.Insert(0, selectedUnit);
-                    TM.SelectUnit(selectedUnit);
-                    break;
+                    i = 0;
+                }
+                else
+                {
+                    i++;
                 }
             }
+            currentPlayerId = i;
+            TM.SelectUnit(idsToPlayerUnits[currentPlayerId]);
+            //átadni a tileMapnak az id-t
         }
-        else if (currentTeam == Team.AI)
+        else if (currentTeam == Team.Player)
         {
-            Debug.LogWarning("reset1");
-            GameObject selectedUnit;
-            for (int i = 0; i < enemyTurnQueue.Count; i++)
+            currentTeam = Team.AI;
+            int i = currentAIId + 1;
+            while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].IsDead)
             {
-                if (!enemyTurnQueue[i].GetComponent<UnitScript>().IsDead)
+                if (currentAIId == maxAIId)
                 {
-                    selectedUnit = enemyTurnQueue[i];
-                    enemyTurnQueue.Add(enemyTurnQueue[0]);
-                    enemyTurnQueue.RemoveAt(0);
-                    selectedUnit.GetComponent<UnitScript>().isTurn = true;
-                    enemyTurnQueue.Insert(0, selectedUnit);
-                    TM.SelectUnit(selectedUnit);
-                    break;
+                    i = 0;
+                }
+                else
+                {
+                    i++;
                 }
             }
+            
+            currentAIId = i;
+            TM.SelectUnit(idsToAIUnits[currentAIId]);
+            //átadni a tileMapnak az id-t
         }
     }
 

@@ -140,7 +140,47 @@ namespace Assets.Scripts.Game
                 currentAIId = i;
             }
         }
-        
+
+        private void PreviousTurn()
+        {
+            if (currentTeam == Team.AI)
+            {
+                currentTeam = Team.Player;
+                //nem jó mert lemehet minuszba, de lehet jó
+                int i = currentPlayerId - 1;
+                while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead)
+                {
+                    if (currentPlayerId < 0)
+                    {
+                        i = maxPlayerId;
+                    }
+                    else
+                    {
+                        i--;
+                    }
+                }
+                currentPlayerId = i;
+            }
+            else if (currentTeam == Team.Player)
+            {
+                currentTeam = Team.AI;
+                int i = currentAIId - 1;
+                while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].IsDead)
+                {
+                    if (currentAIId == 0)
+                    {
+                        i = maxAIId;
+                    }
+                    else
+                    {
+                        i--;
+                    }
+                }
+
+                currentAIId = i;
+            }
+        }
+
         public int GetScoreByDamage(UnitScript unit)
         {
             return unit.attackDamage;
@@ -217,6 +257,8 @@ namespace Assets.Scripts.Game
             {
                 table[currentState.x, currentState.y] = lastStep.changingUnit;
             }
+
+            PreviousTurn();
         }
 
         public void VirtualAttack(UnitScript attackerUnit, UnitScript targetUnit)
