@@ -23,8 +23,8 @@ namespace Assets.Scripts.Game
         public TileMap originalMap;
         public int currentAIId;
         public int currentPlayerId;
-        public Dictionary<int, UnitScript> idsToPlayerUnits;
-        public Dictionary<int, UnitScript> idsToAIUnits;
+        public Dictionary<int, UnitScript> idsToPlayerUnits = new Dictionary<int, UnitScript>();
+        public Dictionary<int, UnitScript> idsToAIUnits = new Dictionary<int, UnitScript>();
         public int maxPlayerId;
         public int maxAIId;
         public Team currentTeam;
@@ -32,6 +32,7 @@ namespace Assets.Scripts.Game
         public VirtualMap(TileMap map, int mapSizeX, int mapSizeY, int selectedAINumber, int selectedPlayerNumber)
         {
             this.originalMap = map;
+            table = new UnitScript[mapSizeX, mapSizeY];
             for (int x = 0; x < mapSizeX; x++)
             {
                 for (int y = 0; y < mapSizeY; y++)
@@ -94,7 +95,8 @@ namespace Assets.Scripts.Game
             {
                 UnitScript target = table[move.x, move.y];
                 VirtualAttack(unit, target);
-                int attackScore = GetScoreByDamage(unit);
+                int attackScore = 0;
+                //int attackScore = GetScoreByDamage(unit);
                 Step step = new Step(Step.Type.Attack, target,attackScore, unit);
                 steps.Push(step);
             }
@@ -110,7 +112,7 @@ namespace Assets.Scripts.Game
                 int i = currentPlayerId + 1;
                 while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead )
                 {
-                    if(currentPlayerId == maxPlayerId)
+                    if(i >= maxPlayerId)
                     {
                         i = 0;
                     }
@@ -127,7 +129,7 @@ namespace Assets.Scripts.Game
                 int i = currentAIId + 1;
                 while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].IsDead)
                 {
-                    if(currentAIId == maxAIId)
+                    if(i >= maxAIId)
                     {
                         i = 0;
                     }
@@ -146,11 +148,10 @@ namespace Assets.Scripts.Game
             if (currentTeam == Team.AI)
             {
                 currentTeam = Team.Player;
-                //nem jó mert lemehet minuszba, de lehet jó
                 int i = currentPlayerId - 1;
                 while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead)
                 {
-                    if (currentPlayerId < 0)
+                    if (i <= 0)
                     {
                         i = maxPlayerId;
                     }
@@ -167,7 +168,7 @@ namespace Assets.Scripts.Game
                 int i = currentAIId - 1;
                 while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].IsDead)
                 {
-                    if (currentAIId == 0)
+                    if (i <= 0)
                     {
                         i = maxAIId;
                     }
@@ -189,12 +190,11 @@ namespace Assets.Scripts.Game
         public int GetScoreByDistance(UnitScript unit, UnitScript[,] table)
         {
             int closestDistance = int.MaxValue;
-            for (int x = 0; x < table.Length; x++)
+            for (int x = 0; x < table.GetLength(0); x++)
             {
-                for (int y = 0; y < table.Length; y++)
+                for (int y = 0; y < table.GetLength(1); y++)
                 {
-                    //state vagy tényleges x,y?
-                    if(table[x,y] != null)
+                    if(table[x,y] != null && table[x,y].team != unit.team)
                     {
                         if (GetDistance(unit.VX, unit.VY, x, y) < closestDistance)
                         {
@@ -310,11 +310,11 @@ namespace Assets.Scripts.Game
             {
                 if (!idToAi.Value.IsDead)
                 {
-                    return true;
+                    return false;
                 }
             }
 
-            return false;
+            return true;
         }
 
     }

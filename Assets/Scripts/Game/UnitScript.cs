@@ -70,14 +70,32 @@ public class UnitScript : MonoBehaviour
         }
     }
 
-    public enum movementStates
+    public MovementState unitMovementState;
+
+    private static int nextAvailablePlayerId = 0;
+    private static int nextAvailableAIId = 0;
+
+    public static int PlayerCount
     {
-        Unselected,
-        Selected,
-        Moved
+        get
+        {
+            return nextAvailablePlayerId;
+        }
     }
 
-    public movementStates unitMovementState;
+    public static int AICount
+    {
+        get
+        {
+            return nextAvailableAIId;
+        }
+    }
+
+    static UnitScript()
+    {
+        nextAvailableAIId = 0;
+        nextAvailablePlayerId = 0;
+    }
 
     private void Awake()
     {
@@ -86,9 +104,19 @@ public class UnitScript : MonoBehaviour
 
         movementQueue = new Queue<int>();
         combatQueue = new Queue<int>();
-        unitMovementState = movementStates.Unselected;
+        unitMovementState = MovementState.Unselected;
         currentHealthPoints = maxHealthPoints;
         hitPointsText.SetText(currentHealthPoints.ToString());
+        if (team == Team.Player)
+        {
+            id = nextAvailablePlayerId;
+            ++nextAvailablePlayerId;
+        }
+        else if(team == Team.AI)
+        {
+            id = nextAvailableAIId;
+            ++nextAvailableAIId;
+        }
     }
 
     public void LateUpdate()
@@ -96,36 +124,36 @@ public class UnitScript : MonoBehaviour
         healthBarCanvas.transform.forward = Camera.main.transform.forward;
     }
 
-    public movementStates GetMovementState(int i)
+    public MovementState GetMovementState(int i)
     {
         if (i == 0)
         {
-            return movementStates.Unselected;
+            return MovementState.Unselected;
         }
         if(i == 1)
         {
-            return movementStates.Selected;
+            return MovementState.Selected;
         }
         if(i == 2)
         {
-            return movementStates.Moved;
+            return MovementState.Moved;
         }
-        return movementStates.Unselected;
+        return MovementState.Unselected;
     }
 
     public void SetMovementState(int i)
     {
         if (i == 0)
         {
-            unitMovementState = movementStates.Unselected;
+            unitMovementState = MovementState.Unselected;
         }
         if (i == 1)
         {
-           unitMovementState =  movementStates.Selected;
+           unitMovementState =  MovementState.Selected;
         }
         if (i == 2)
         {
-            unitMovementState = movementStates.Moved;
+            unitMovementState = MovementState.Moved;
         }
     }
 
@@ -182,7 +210,7 @@ public class UnitScript : MonoBehaviour
         {
             yield return new WaitForEndOfFrame();
         }
-        hideUnit();
+        this.gameObject.SetActive(false);
         GameObject tile = gameObject.GetComponent<UnitScript>().tileBeingOccupied;
         tile.GetComponent<ClickableTile>().unitOnTile = null;
         gameObject.GetComponent<UnitScript>().tileBeingOccupied = null;
@@ -193,17 +221,5 @@ public class UnitScript : MonoBehaviour
     {
         healthBar.fillAmount = (float)currentHealthPoints / maxHealthPoints;
         hitPointsText.SetText(currentHealthPoints.ToString());
-    }
-
-    public void hideUnit()
-    {
-        foreach (Transform child in transform)
-            child.gameObject.SetActive(false);
-    }
-
-    public void showUnit()
-    {
-        foreach (Transform child in transform)
-            child.gameObject.SetActive(true);
     }
 }

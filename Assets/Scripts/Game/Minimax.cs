@@ -6,10 +6,18 @@ using UnityEngine;
 
 public class Minimax : MonoBehaviour
 {
-    public double minimax(TileMap map, bool maxPlayer, int depth, double alpha, double beta, int selectedAINumber, int selectedPlayerNumber) {
+    Position globalBestMove;
+    double globalBestScore;
+    int maxDepth;
+
+    public Position minimax(TileMap map, bool maxPlayer, int depth, double alpha, double beta, int selectedAINumber, int selectedPlayerNumber) {
         VirtualMap virtualMap = new VirtualMap(map, map.mapSizeX, map.mapSizeY, selectedAINumber, selectedPlayerNumber);
-        return minimax_r(virtualMap, maxPlayer, depth, alpha, beta);
+        globalBestScore = int.MinValue;
+        maxDepth = depth;
+        minimax_r(virtualMap, maxPlayer, depth, alpha, beta);
+        return globalBestMove;
     }
+
     private double minimax_r(VirtualMap map, bool maxPlayer, int depth, double alpha, double beta)
     {
         if (depth == 0 || map.IsGameOver())
@@ -21,18 +29,29 @@ public class Minimax : MonoBehaviour
         if (maxPlayer)
         {
             double bestScore = double.MinValue;
+            Position bestMove = options[0];
             foreach (Position option in options)
             {
-                GameManager.Log("AI");
                 map.doMove(option, map.CurrentUnit);
+                GameManager.LogState(depth, map.idsToAIUnits[0]);
                 double score = minimax_r(map, false, depth - 1, alpha, beta);
                 map.redoMove();
                 bestScore = Math.Max(score, bestScore);
+                if(bestScore < score)
+                {
+                    bestScore = score;
+                    bestMove = option;
+                }
                 alpha = Math.Max(alpha, bestScore);
                 if (beta <= alpha)
                 {
                     break;
                 }
+            }
+            if (depth == maxDepth && globalBestScore < bestScore)
+            {
+                globalBestScore = bestScore;
+                globalBestMove = bestMove;
             }
             return bestScore;
         }
@@ -41,7 +60,6 @@ public class Minimax : MonoBehaviour
             double bestScore = double.MaxValue;
             foreach (Position option in options)
             {
-                Debug.Log("Player");
                 map.doMove(option, map.CurrentUnit);
                 double score = minimax_r(map, true, depth - 1, alpha, beta);
                 map.redoMove();

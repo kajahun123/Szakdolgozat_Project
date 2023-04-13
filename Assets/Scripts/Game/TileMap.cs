@@ -66,7 +66,7 @@ public class TileMap : MonoBehaviour
 
     
 
-    private void Start()
+    private void Awake()
     {
 
         GenerateMapData();
@@ -115,7 +115,8 @@ public class TileMap : MonoBehaviour
         {
             for (int y = 0; y < mapSizeY; y++)
             {
-                tiles[x, y] = Random.Range(0, 6) == 3 ? 1 : 0;
+                //tiles[x, y] = Random.Range(0, 6) == 3 ? 1 : 0;
+                tiles[x, y] = 0;
             }
         }
     }
@@ -275,14 +276,11 @@ public class TileMap : MonoBehaviour
 
     public void SelectUnit(GameObject unit)
     {
-        if (GM.tileBeingDisplayed != null)
-        {
-            selectedUnit = unit;
-            selectedUnit.GetComponent<UnitScript>().map = this;
-            selectedUnit.GetComponent<UnitScript>().SetMovementState(1);
-            unitSelected = true;
-            highlightUnitRange();
-        }
+        selectedUnit = unit;
+        selectedUnit.GetComponent<UnitScript>().map = this;
+        selectedUnit.GetComponent<UnitScript>().SetMovementState(1);
+        unitSelected = true;
+        highlightUnitRange();
     }
 
     public IEnumerator moveUnitAndFinalize()
@@ -312,7 +310,7 @@ public class TileMap : MonoBehaviour
         //Moved állapotba tesszük
         selectedUnit.GetComponent<UnitScript>().SetMovementState(2);
         deselectUnit();
-        GM.EndTurn();
+        GM.NextTurn();
     }
 
     public void finalizeOption()
@@ -431,16 +429,13 @@ public class TileMap : MonoBehaviour
         else if (selectedUnit.GetComponent<UnitScript>().team == Team.AI)
         {
             //doMove(findBestMove());
-            Node bestMove = findBestMove();
+            Position bestMove = AI.minimax(this, true, 3, double.MinValue, double.MaxValue, GM.currentAIId, GM.currentPlayerId);
             generatePathTo(bestMove.x, bestMove.y);
             unitSelectedPreviousX = selectedUnit.GetComponent<UnitScript>().x;
             unitSelectedPreviousY = selectedUnit.GetComponent<UnitScript>().y;
             previousOccupiedTile = selectedUnit.GetComponent<UnitScript>().tileBeingOccupied;
-            Debug.Log("CurrentPath : " + currentPath);
             moveUnit();
             StartCoroutine(moveUnitAndFinalize());
-            Debug.Log("x: " + bestMove.x + ", y: " + bestMove.y);
-            Debug.Log("sikerült az AI lépés");
             return true;
         }
         return false;
@@ -666,7 +661,6 @@ public class TileMap : MonoBehaviour
 
     public void generatePathTo(int x, int y)
     {
-        Debug.Log("asd");
         //Ugyan oda kattintott mint ahol a unit áll
         if (selectedUnit.GetComponent<UnitScript>().x == x && selectedUnit.GetComponent<UnitScript>().y == y)
         {
@@ -751,30 +745,6 @@ public class TileMap : MonoBehaviour
             //megforditjuk
             currentPath.Reverse();
             selectedUnit.GetComponent<UnitScript>().path = currentPath;
-    }
-
-    public Node findBestMove()
-    {
-        HashSet<Node> moves = getActualMovementOptions(selectedUnit);
-        moves.UnionWith(getUnitAttackOptions());
-        double bestScore = double.MinValue;
-        Node bestMove = null;
-        foreach (Node m in moves)
-        {
-            Debug.LogWarning(this.selectedUnit);
-            double score = AI.minimax(this, true, 4, double.MinValue, double.MaxValue, selectedUnit.GetComponent<UnitScript>());
-            
-            if (score > bestScore)
-            {
-                bestScore = score;
-                bestMove = m;
-                
-                Debug.Log("Best: " + bestMove.x + ", " + bestMove.y);
-            }
-            Debug.Log("move: " + m.x + ", " + m.y);
-        }
-        Debug.Log("vége");
-        return bestMove;
     }
 
     public HashSet<Node> getActualMovementOptions(GameObject unit)

@@ -248,7 +248,7 @@ GameObject:
   m_Component:
   - component: {fileID: 730988016}
   m_Layer: 0
-  m_Name: Team1
+  m_Name: PlayerTeam
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -411,7 +411,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1291465386}
   m_Layer: 0
-  m_Name: Team2
+  m_Name: AITeam
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -573,10 +573,15 @@ MonoBehaviour:
   selectedYTile: 0
   cursorX: 0
   cursorY: 0
-  team1: {fileID: 730988015}
-  team2: {fileID: 1291465385}
+  playerTeam: {fileID: 730988015}
+  aiTeam: {fileID: 1291465385}
   playerTurnQueue: []
   enemyTurnQueue: []
+  isLoggingOn: 1
+  currentPlayerId: 0
+  currentAIId: 0
+  playerCount: 0
+  enemyCount: 0
 --- !u!114 &1832099944
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -595,12 +600,10 @@ MonoBehaviour:
   - name: Grass
     tileVisualPrefab: {fileID: 6666128445773416271, guid: 0087876a09c533f4696b0f2d8d2e294f, type: 3}
     movementCost: 1
-    unitOnTile: {fileID: 0}
     isWalkable: 1
   - name: Wall
     tileVisualPrefab: {fileID: 4666950267300244527, guid: 15326629b427cf941af0b41f1ffef308, type: 3}
     movementCost: 1
-    unitOnTile: {fileID: 0}
     isWalkable: 0
   unitsOnBoard: {fileID: 1475604810}
   mapSizeX: 10
@@ -673,7 +676,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b545d1c66e9b00d48848afba3499c92c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GM: {fileID: 1832099943}
 --- !u!1 &1946879455
 GameObject:
   m_ObjectHideFlags: 0
