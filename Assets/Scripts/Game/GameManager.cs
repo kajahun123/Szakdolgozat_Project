@@ -38,6 +38,11 @@ public class GameManager : MonoBehaviour
     public int playerCount;
     public int enemyCount;
 
+    public void Awake()
+    {
+        UnitScript.nextAvailablePlayerId = 0;
+        UnitScript.nextAvailableAIId = 0;
+    }
     public void Start()
     {
         TM = GetComponent<TileMap>();

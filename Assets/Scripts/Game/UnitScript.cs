@@ -72,8 +72,8 @@ public class UnitScript : MonoBehaviour
 
     public MovementState unitMovementState;
 
-    private static int nextAvailablePlayerId = 0;
-    private static int nextAvailableAIId = 0;
+    public static int nextAvailablePlayerId;
+    public static int nextAvailableAIId;
 
     public static int PlayerCount
     {
@@ -89,12 +89,6 @@ public class UnitScript : MonoBehaviour
         {
             return nextAvailableAIId;
         }
-    }
-
-    static UnitScript()
-    {
-        nextAvailableAIId = 0;
-        nextAvailablePlayerId = 0;
     }
 
     private void Awake()

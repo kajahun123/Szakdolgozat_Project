@@ -3,6 +3,7 @@ using Assets.Scripts.Game;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -66,11 +67,11 @@ public class TileMap : MonoBehaviour
     public GameObject tempEnemy;
     public int tempHP;
 
-
+    private bool isGameOver;
 
     private void Awake()
     {
-
+        isGameOver = false;
         GenerateMapData();
         generatePathFindingGraph();
         GenerateMapVisuals();
@@ -81,9 +82,16 @@ public class TileMap : MonoBehaviour
     {
         if (GM.IsGameOver())
         {
+            isGameOver = true;
             SceneManager.LoadScene(0, LoadSceneMode.Single);
             return;
         }
+
+        if (isGameOver)
+        {
+            return;
+        }
+
         //Bal kattintás
         if (Input.GetMouseButtonDown(0))
         {
@@ -98,15 +106,8 @@ public class TileMap : MonoBehaviour
             {
                 selectTileToDoAction();
             }
-            //TODO: kicserélni, hogy mozgással együtt legyen a támadás
-            /* else if (selectedUnit.GetComponent<UnitScript>().unitMovementState == selectedUnit.GetComponent<UnitScript>().GetMovementState(2))
-             {
-                 finalizeOption();
-             }*/
-
         }
     }
-
     public void GenerateMapData()
     {
         tiles = new int[mapSizeX, mapSizeY];
