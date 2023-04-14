@@ -784,7 +784,7 @@ PrefabInstance:
       objectReference: {fileID: 992728972}
     - target: {fileID: 2473645985043914799, guid: a0df384f0cdb594429909ffc45f95775, type: 3}
       propertyPath: maxHealthPoints
-      value: 1
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5095874702117085533, guid: a0df384f0cdb594429909ffc45f95775, type: 3}
       propertyPath: m_AnchoredPosition.x

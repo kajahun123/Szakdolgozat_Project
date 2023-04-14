@@ -95,8 +95,8 @@ namespace Assets.Scripts.Game
             {
                 UnitScript target = table[move.x, move.y];
                 VirtualAttack(unit, target);
-                int attackScore = 0;
-                //int attackScore = GetScoreByDamage(unit);
+                //int attackScore = 0;
+                int attackScore = GetScoreByDamage(unit);
                 Step step = new Step(Step.Type.Attack, target, attackScore, unit);
                 steps.Push(step);
             }

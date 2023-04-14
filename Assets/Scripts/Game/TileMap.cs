@@ -388,9 +388,6 @@ public class TileMap : MonoBehaviour
                     if ((hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile == null || hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile == selectedUnit) && (selectedUnitMoveRange.Contains(nodeToCeck)))
                     {
                         generatePathTo(clickedTileX, clickedTileY);
-                        unitSelectedPreviousX = selectedUnit.GetComponent<UnitScript>().x;
-                        unitSelectedPreviousY = selectedUnit.GetComponent<UnitScript>().y;
-                        previousOccupiedTile = selectedUnit.GetComponent<UnitScript>().tileBeingOccupied;
                         moveUnit();
                         //finalizeOption();
                         StartCoroutine(moveUnitAndFinalize());
@@ -399,9 +396,7 @@ public class TileMap : MonoBehaviour
                     {
                         if (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints > 0)
                         {
-                            Debug.Log("Támadás Tile");
                             StartCoroutine(BM.Attack(selectedUnit, hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile));
-                            Debug.Log("HP: " + hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints);
                             StartCoroutine(attackUnitAndFinalize(selectedUnit));
                         }
                     }
@@ -415,10 +410,8 @@ public class TileMap : MonoBehaviour
                     {
                         if (unitClicked.GetComponent<UnitScript>().currentHealthPoints > 0)
                         {
-                            Debug.Log("Támadás Unit");
                             StartCoroutine(BM.Attack(selectedUnit, unitClicked));
                             StartCoroutine(attackUnitAndFinalize(selectedUnit));
-                            Debug.Log("HP: " + unitClicked.GetComponent<UnitScript>().currentHealthPoints);
                         }
                     }
                 }
@@ -426,18 +419,23 @@ public class TileMap : MonoBehaviour
         }
         else if (selectedUnit.GetComponent<UnitScript>().team == Team.AI)
         {
-            //doMove(findBestMove());
+            UnitScript unit = selectedUnit.GetComponent<UnitScript>();
             Position bestMove = AI.minimax(this, true, 3, double.MinValue, double.MaxValue, GM.currentAIId, GM.currentPlayerId);
-            generatePathTo(bestMove.x, bestMove.y);
-            unitSelectedPreviousX = selectedUnit.GetComponent<UnitScript>().x;
-            unitSelectedPreviousY = selectedUnit.GetComponent<UnitScript>().y;
-            previousOccupiedTile = selectedUnit.GetComponent<UnitScript>().tileBeingOccupied;
-            moveUnit();
-            StartCoroutine(moveUnitAndFinalize());
-        }
-        else
-        {
-            throw new Exception("Can't do move");
+            if(tilesOnMap[bestMove.x, bestMove.y].GetComponent<ClickableTile>().unitOnTile == null)
+            {
+                generatePathTo(bestMove.x, bestMove.y);
+                moveUnit();
+                StartCoroutine(moveUnitAndFinalize());
+            }
+            else if(tilesOnMap[bestMove.x, bestMove.y].GetComponent<ClickableTile>().unitOnTile != null && tilesOnMap[bestMove.x, bestMove.y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().team != unit.team)
+            {
+                StartCoroutine(BM.Attack(selectedUnit, tilesOnMap[bestMove.x, bestMove.y].GetComponent<ClickableTile>().unitOnTile));
+                StartCoroutine(attackUnitAndFinalize(selectedUnit));
+            }
+            else
+            {
+                throw new Exception("Can't do move");
+            }
         }
     }
 
