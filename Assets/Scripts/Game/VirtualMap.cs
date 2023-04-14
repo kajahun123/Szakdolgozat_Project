@@ -45,16 +45,16 @@ namespace Assets.Scripts.Game
                         table[x, y].states = new Stack<UnitState>();
                         UnitState initialState = new UnitState(table[x, y]);
                         table[x, y].states.Push(initialState);
-                        if(table[x,y].team == Team.Player)
+                        if (table[x, y].team == Team.Player)
                         {
-                            if(table[x, y].id > maxPlayerId)
+                            if (table[x, y].id > maxPlayerId)
                             {
                                 maxPlayerId = table[x, y].id;
                             }
 
                             idsToPlayerUnits.Add(table[x, y].id, table[x, y]);
                         }
-                        else if(table[x,y].team == Team.AI)
+                        else if (table[x, y].team == Team.AI)
                         {
                             if (table[x, y].id > maxAIId)
                             {
@@ -77,7 +77,7 @@ namespace Assets.Scripts.Game
 
         public void doMove(Position move, UnitScript unit)
         {
-            if (table[move.x, move.y] == null)
+            if (IsFieldEmpty(move.x,move.y))
             {
                 UnitState lastState = unit.states.Peek();
                 UnitState newState = new UnitState(lastState);
@@ -87,18 +87,22 @@ namespace Assets.Scripts.Game
                 table[lastState.x, lastState.y] = null;
                 table[move.x, move.y] = unit;
                 //függvény: minél közelebb lép a legközelebbi játékoshoz, annál több pont, minél távolabb annál kevesebb
-                int movementScore = GetScoreByDistance(unit, table);
-                Step step = new Step(Step.Type.Movement, unit,movementScore);
+                double movementScore = GetScoreByDistance(unit, table);
+                Step step = new Step(Step.Type.Movement, unit, movementScore);
                 steps.Push(step);
             }
-            else if (table[move.x, move.y] != null && table[move.x, move.y].team != unit.team)
+            else if (IsEnemyOnField(unit, move.x, move.y))
             {
                 UnitScript target = table[move.x, move.y];
                 VirtualAttack(unit, target);
                 int attackScore = 0;
                 //int attackScore = GetScoreByDamage(unit);
-                Step step = new Step(Step.Type.Attack, target,attackScore, unit);
+                Step step = new Step(Step.Type.Attack, target, attackScore, unit);
                 steps.Push(step);
+            }
+            else
+            {
+                throw new Exception("Cannot make a step!");
             }
 
             NextTurn();
@@ -106,13 +110,13 @@ namespace Assets.Scripts.Game
 
         private void NextTurn()
         {
-            if(currentTeam == Team.AI)
+            if (currentTeam == Team.AI)
             {
                 currentTeam = Team.Player;
                 int i = currentPlayerId + 1;
-                while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead )
+                while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead)
                 {
-                    if(i >= maxPlayerId)
+                    if (i >= maxPlayerId)
                     {
                         i = 0;
                     }
@@ -123,13 +127,13 @@ namespace Assets.Scripts.Game
                 }
                 currentPlayerId = i;
             }
-            else if(currentTeam == Team.Player)
+            else if (currentTeam == Team.Player)
             {
                 currentTeam = Team.AI;
                 int i = currentAIId + 1;
                 while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].IsDead)
                 {
-                    if(i >= maxAIId)
+                    if (i >= maxAIId)
                     {
                         i = 0;
                     }
@@ -184,17 +188,24 @@ namespace Assets.Scripts.Game
 
         public int GetScoreByDamage(UnitScript unit)
         {
-            return unit.attackDamage;
+            if (unit.team == Team.Player)
+            {
+                return -unit.attackDamage;
+            }
+            else
+            {
+                return unit.attackDamage;
+            }
         }
 
-        public int GetScoreByDistance(UnitScript unit, UnitScript[,] table)
+        public double GetScoreByDistance(UnitScript unit, UnitScript[,] table)
         {
             int closestDistance = int.MaxValue;
             for (int x = 0; x < table.GetLength(0); x++)
             {
                 for (int y = 0; y < table.GetLength(1); y++)
                 {
-                    if(table[x,y] != null && table[x,y].team != unit.team)
+                    if (table[x, y] != null && table[x, y].team != unit.team)
                     {
                         if (GetDistance(unit.VX, unit.VY, x, y) < closestDistance)
                         {
@@ -203,7 +214,7 @@ namespace Assets.Scripts.Game
                     }
                 }
             }
-            return -closestDistance;   
+            return (double)-closestDistance;
         }
 
 
@@ -216,7 +227,7 @@ namespace Assets.Scripts.Game
                 {
                     if (IsValidMove(unit, x, y))
                     {
-                        Position move = new Position(x,y);
+                        Position move = new Position(x, y);
                         legalMoves.Add(move);
                     }
                 }
@@ -224,10 +235,10 @@ namespace Assets.Scripts.Game
             return legalMoves;
         }
 
-        public bool IsValidMove(UnitScript unit, int targetX, int targetY) 
+        public bool IsValidMove(UnitScript unit, int targetX, int targetY)
         {
             int distance = GetDistance(unit.VX, unit.VY, targetX, targetY);
-            if (distance <= unit.movementRange && IsFieldEmpty(targetX,targetY))
+            if (distance <= unit.movementRange && IsFieldEmpty(targetX, targetY))
             {
                 return true;
             }
@@ -240,7 +251,7 @@ namespace Assets.Scripts.Game
 
         public int GetDistance(int startX, int startY, int endX, int endY)
         {
-            return Math.Abs(endX - startX) + Math.Abs(endY - startY); 
+            return Math.Abs(endX - startX) + Math.Abs(endY - startY);
         }
 
         public void redoMove()
@@ -257,7 +268,6 @@ namespace Assets.Scripts.Game
             {
                 table[currentState.x, currentState.y] = lastStep.changingUnit;
             }
-
             PreviousTurn();
         }
 
@@ -294,7 +304,7 @@ namespace Assets.Scripts.Game
             bool teamHasUnit = false;
             foreach (var idToPlayer in idsToPlayerUnits)
             {
-                if (!idToPlayer.Value.IsDead)
+                if (!idToPlayer.Value.VIsDead)
                 {
                     teamHasUnit = true;
                     break;
@@ -308,7 +318,7 @@ namespace Assets.Scripts.Game
 
             foreach (var idToAi in idsToAIUnits)
             {
-                if (!idToAi.Value.IsDead)
+                if (!idToAi.Value.VIsDead)
                 {
                     return false;
                 }

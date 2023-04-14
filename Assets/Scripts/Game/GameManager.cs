@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
     public List<GameObject> enemyTurnQueue = new List<GameObject>();
 
     public bool isLoggingOn = true;
-    private static bool _isLoggingOn;
+    public static bool _isDebugModeOn;
 
     public int currentPlayerId;
     public int currentAIId;
@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour
     public void Start()
     {
         TM = GetComponent<TileMap>();
-        _isLoggingOn = isLoggingOn;
+        _isDebugModeOn = isLoggingOn;
         addAllUnitsToDictionary();
         FirstTurn();
     }
@@ -63,20 +63,20 @@ public class GameManager : MonoBehaviour
 
     public static void Log(string message)
     {
-        if (_isLoggingOn)
+        if (_isDebugModeOn)
         {
             Debug.Log(message);
         }
     }
 
-    public static void LogState(int depth, UnitScript unit)
+    public static void LogState(int depth, UnitScript unit, double score)
     {
         string message = depth + ", " + unit.UnitName + " / " ;
         foreach (UnitState state in unit.states)
         {
             message += "(" + state.x + ", " + state.y + ") ";
         }
-        Log(message);
+        Log(message + ", " + score);
     }
 
     public void CursorUiUpdate()
@@ -285,41 +285,35 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public int checkWin()
+    public bool IsGameOver()
     {
-        bool playerTeamAlive = false;
-        bool enemyTeamAlive = false;
-        foreach (Transform u in playerTeam.transform)
+        bool teamHasUnit = false;
+        foreach (var idToPlayer in idsToPlayerUnits)
         {
-            //Debug.Log("Win: " + u.GetComponent<UnitScript>().UnitName);
-            if (!u.GetComponent<UnitScript>().IsDead)
+            if (!idToPlayer.Value.IsDead)
             {
-                playerTeamAlive = true;
-                break;
-            }
-        }
-        foreach (Transform u in aiTeam.transform)
-        {
-            //Debug.Log("Win: " + u.GetComponent<UnitScript>().UnitName);
-            if (!u.GetComponent<UnitScript>().IsDead)
-            {
-                enemyTeamAlive = true;
+                teamHasUnit = true;
                 break;
             }
         }
 
-        if (playerTeamAlive == false)
+        if (!teamHasUnit)
         {
-            return 1;
+            return true;
         }
-        else if (enemyTeamAlive == false)
+
+        foreach (var idToAi in idsToAIUnits)
         {
-            return -1;
+            if (!idToAi.Value.IsDead)
+            {
+                return false;
+            }
         }
-        return 0;
+
+        return true;
     }
 
-    
+
 
 
 }

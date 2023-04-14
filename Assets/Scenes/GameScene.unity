@@ -775,6 +775,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1232282877}
     - target: {fileID: 2473645985043914799, guid: a0df384f0cdb594429909ffc45f95775, type: 3}
+      propertyPath: movementRange
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2473645985043914799, guid: a0df384f0cdb594429909ffc45f95775, type: 3}
       propertyPath: healthBarCanvas
       value: 
       objectReference: {fileID: 992728972}
@@ -817,7 +821,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7161020086859427456, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 7161020086859427456, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
       propertyPath: m_LocalPosition.y
@@ -825,7 +829,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7161020086859427456, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 7161020086859427456, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -856,8 +860,20 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002928, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
+      propertyPath: x
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7161020087466002928, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
+      propertyPath: y
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7161020087466002928, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
       propertyPath: UnitName
       value: Unit
+      objectReference: {fileID: 0}
+    - target: {fileID: 7161020087466002928, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
+      propertyPath: movementRange
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002943, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
       propertyPath: m_Name

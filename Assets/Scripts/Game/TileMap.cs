@@ -1,8 +1,10 @@
 
 using Assets.Scripts.Game;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class TileMap : MonoBehaviour
 {
@@ -64,7 +66,7 @@ public class TileMap : MonoBehaviour
     public GameObject tempEnemy;
     public int tempHP;
 
-    
+
 
     private void Awake()
     {
@@ -77,6 +79,11 @@ public class TileMap : MonoBehaviour
 
     private void Update()
     {
+        if (GM.IsGameOver())
+        {
+            SceneManager.LoadScene(0, LoadSceneMode.Single);
+            return;
+        }
         //Bal kattintás
         if (Input.GetMouseButtonDown(0))
         {
@@ -89,21 +96,17 @@ public class TileMap : MonoBehaviour
             else if (selectedUnit.GetComponent<UnitScript>().unitMovementState == selectedUnit.GetComponent<UnitScript>().GetMovementState(1)
                 && selectedUnit.GetComponent<UnitScript>().movementQueue.Count == 0)
             {
-
-                if (selectTileToDoAction())
-                {
-                    
-                }
+                selectTileToDoAction();
             }
             //TODO: kicserélni, hogy mozgással együtt legyen a támadás
-           /* else if (selectedUnit.GetComponent<UnitScript>().unitMovementState == selectedUnit.GetComponent<UnitScript>().GetMovementState(2))
-            {
-                finalizeOption();
-            }*/
+            /* else if (selectedUnit.GetComponent<UnitScript>().unitMovementState == selectedUnit.GetComponent<UnitScript>().GetMovementState(2))
+             {
+                 finalizeOption();
+             }*/
 
         }
     }
-    
+
     public void GenerateMapData()
     {
         tiles = new int[mapSizeX, mapSizeY];
@@ -133,7 +136,7 @@ public class TileMap : MonoBehaviour
         {
             for (int y = 0; y < mapSizeY; y++)
             {
-                GameObject newTile = Instantiate(tileTypes[tiles[x,y]].tileVisualPrefab, new Vector3(x, 0,y), Quaternion.identity);
+                GameObject newTile = Instantiate(tileTypes[tiles[x, y]].tileVisualPrefab, new Vector3(x, 0, y), Quaternion.identity);
                 newTile.GetComponent<ClickableTile>().tileX = x;
                 newTile.GetComponent<ClickableTile>().tileY = y;
                 newTile.GetComponent<ClickableTile>().map = this;
@@ -141,7 +144,7 @@ public class TileMap : MonoBehaviour
                 newTile.transform.SetParent(TileContainer.transform);
                 tilesOnMap[x, y] = newTile;
 
-               GameObject gridUI = Instantiate(mapUI, new Vector3(x, 0.501f, y), Quaternion.Euler(90f, 0, 0));
+                GameObject gridUI = Instantiate(mapUI, new Vector3(x, 0.501f, y), Quaternion.Euler(90f, 0, 0));
                 gridUI.transform.SetParent(UIQuadPotentialMovesContainer.transform);
                 quadOnMap[x, y] = gridUI;
                 /* 
@@ -214,7 +217,7 @@ public class TileMap : MonoBehaviour
     {
         foreach (Transform team in unitsOnBoard.transform)
         {
-            
+
             foreach (Transform unitOnTeam in team)
             {
                 var unit = unitOnTeam.GetComponent<UnitScript>();
@@ -246,24 +249,24 @@ public class TileMap : MonoBehaviour
     {
         if (selectedUnit != null)
         {
-            
+
             selectedUnit.GetComponent<UnitScript>().MoveToNextTile();
         }
     }
 
     public void mouseClickToSelectUnit()
     {
-        if (unitSelected == false && GM.tileBeingDisplayed != null )
+        if (unitSelected == false && GM.tileBeingDisplayed != null)
         {
-            
+
             if (GM.tileBeingDisplayed.GetComponent<ClickableTile>().unitOnTile != null)
             {
-               
+
                 GameObject tempSelectedUnit = GM.tileBeingDisplayed.GetComponent<ClickableTile>().unitOnTile;
                 if (tempSelectedUnit.GetComponent<UnitScript>().unitMovementState == tempSelectedUnit.GetComponent<UnitScript>().GetMovementState(0)
                     && tempSelectedUnit.GetComponent<UnitScript>().team == GM.currentTeam)
                 {
-                    
+
                     selectedUnit = tempSelectedUnit;
                     selectedUnit.GetComponent<UnitScript>().map = this;
                     selectedUnit.GetComponent<UnitScript>().SetMovementState(1);
@@ -285,11 +288,11 @@ public class TileMap : MonoBehaviour
 
     public IEnumerator moveUnitAndFinalize()
     {
-        while (selectedUnit.GetComponent<UnitScript>().movementQueue.Count !=0)
+        while (selectedUnit.GetComponent<UnitScript>().movementQueue.Count != 0)
         {
             yield return new WaitForEndOfFrame();
         }
-        
+
         finalizeMovementPosition();
     }
 
@@ -328,10 +331,10 @@ public class TileMap : MonoBehaviour
                     int unitX = unitOnTile.GetComponent<UnitScript>().x;
                     int unitY = unitOnTile.GetComponent<UnitScript>().y;
                     Debug.Log("Elõtte: " + selectedUnit.name);
-                        deselectUnit();
+                    deselectUnit();
                     Debug.Log("vége");
                 }
-                
+
             }
             else if (hit.transform.parent != null && hit.transform.parent.gameObject.CompareTag("Unit"))
             {
@@ -365,13 +368,13 @@ public class TileMap : MonoBehaviour
         }
     }
 
-    public bool selectTileToDoAction()
+    public void selectTileToDoAction()
     {
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         HashSet<Node> attackableTiles = getUnitAttackOptions();
 
-        if (selectedUnit.GetComponent<UnitScript>().team == 0)
+        if (selectedUnit.GetComponent<UnitScript>().team == Team.Player)
         {
             if (Physics.Raycast(ray, out hit))
             {
@@ -390,7 +393,6 @@ public class TileMap : MonoBehaviour
                         moveUnit();
                         //finalizeOption();
                         StartCoroutine(moveUnitAndFinalize());
-                        return true;
                     }
                     if (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile != null && (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().team != selectedUnit.GetComponent<UnitScript>().team) && (attackableTiles.Contains(nodeToCeck)))
                     {
@@ -400,11 +402,8 @@ public class TileMap : MonoBehaviour
                             StartCoroutine(BM.Attack(selectedUnit, hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile));
                             Debug.Log("HP: " + hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints);
                             StartCoroutine(attackUnitAndFinalize(selectedUnit));
-
-                            return true;
                         }
                     }
-
                 }
                 else if (hit.transform.parent.gameObject.CompareTag("Unit"))
                 {
@@ -419,11 +418,9 @@ public class TileMap : MonoBehaviour
                             StartCoroutine(BM.Attack(selectedUnit, unitClicked));
                             StartCoroutine(attackUnitAndFinalize(selectedUnit));
                             Debug.Log("HP: " + unitClicked.GetComponent<UnitScript>().currentHealthPoints);
-                            return true;
                         }
                     }
                 }
-
             }
         }
         else if (selectedUnit.GetComponent<UnitScript>().team == Team.AI)
@@ -436,9 +433,11 @@ public class TileMap : MonoBehaviour
             previousOccupiedTile = selectedUnit.GetComponent<UnitScript>().tileBeingOccupied;
             moveUnit();
             StartCoroutine(moveUnitAndFinalize());
-            return true;
         }
-        return false;
+        else
+        {
+            throw new Exception("Can't do move");
+        }
     }
 
     public HashSet<Node> getUnitMovementOptions()
@@ -454,7 +453,7 @@ public class TileMap : MonoBehaviour
         foreach (Node n in unitInitialNode.neighbours)
         {
             cost[n.x, n.y] = costToEnterTile(n.x, n.y);
-            if(moveSpeed - cost[n.x, n.y] >= 0)
+            if (moveSpeed - cost[n.x, n.y] >= 0)
             {
                 UIHighlight.Add(n);
             }
@@ -486,7 +485,7 @@ public class TileMap : MonoBehaviour
         return finalMovementHighlight;
     }
 
-    
+
 
     public HashSet<Node> getUnitAttackOptions()
     {
@@ -541,7 +540,7 @@ public class TileMap : MonoBehaviour
 
                 neighbourHash = tempNeighbourHash;
                 tempNeighbourHash = new HashSet<Node>();
-                if (i < attRange -1)
+                if (i < attRange - 1)
                 {
                     seenNodes.UnionWith(neighbourHash);
                 }
@@ -557,9 +556,9 @@ public class TileMap : MonoBehaviour
     public bool unitCanEnterTile(int x, int y)
     {
         //ha ellenfél van ott, ahova lépni akarunk akkor false-t dob vissza
-        if (tilesOnMap[x,y].GetComponent<ClickableTile>().unitOnTile != null)
+        if (tilesOnMap[x, y].GetComponent<ClickableTile>().unitOnTile != null)
         {
-            if (tilesOnMap[x,y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().team != selectedUnit.GetComponent<UnitScript>().team)
+            if (tilesOnMap[x, y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().team != selectedUnit.GetComponent<UnitScript>().team)
             {
                 return false;
             }
@@ -584,7 +583,7 @@ public class TileMap : MonoBehaviour
         //highlightEnemiesInRange(totalAttackableTiles);
         highlightUnitAttackOption();
 
-        
+
         selectedUnitMoveRange = finalMovementHighlight;
         //selectedUnitAttackRange = totalAttackableTiles;
     }
@@ -636,7 +635,7 @@ public class TileMap : MonoBehaviour
 
     public void disableHighlightMovementRange()
     {
-        foreach  (GameObject quad in quadOnMap)
+        foreach (GameObject quad in quadOnMap)
         {
             if (quad.GetComponent<Renderer>().enabled == true)
             {
@@ -648,8 +647,8 @@ public class TileMap : MonoBehaviour
     public float costToEnterTile(int x, int y)
     {
         //Ha nem tud belépni akkor végtelen
-        
-        if (unitCanEnterTile(x,y) == false)
+
+        if (unitCanEnterTile(x, y) == false)
         {
             return Mathf.Infinity;
         }
@@ -666,12 +665,12 @@ public class TileMap : MonoBehaviour
         {
             currentPath = new List<Node>();
             selectedUnit.GetComponent<UnitScript>().path = currentPath;
-            
+
             return;
         }
 
         //nem tudunk oda lépni, visszatérünk
-        if(unitCanEnterTile(x,y) == false)
+        if (unitCanEnterTile(x, y) == false)
         {
             return;
         }
@@ -690,7 +689,7 @@ public class TileMap : MonoBehaviour
         foreach (Node n in graph)
         {
             //mindegyiket beallitjuk végtelenre
-            if(n != source)
+            if (n != source)
             {
                 dist[n] = Mathf.Infinity;
                 prev[n] = null;
@@ -723,28 +722,28 @@ public class TileMap : MonoBehaviour
                 float alt = dist[u] + costToEnterTile(n.x, n.y);
                 if (alt < dist[n])
                 {
-                    
+
                     dist[n] = alt;
                     prev[n] = u;
                 }
             }
         }
-            if(prev[target] == null)
-            {
-                return;
-            }
-            currentPath = new List<Node>();
-            Node curr = target;
+        if (prev[target] == null)
+        {
+            return;
+        }
+        currentPath = new List<Node>();
+        Node curr = target;
 
-            //hozzáadjuk a céltól a startig
-            while (curr != null)
-            {
-                currentPath.Add(curr);
-                curr = prev[curr];
-            }
-            //megforditjuk
-            currentPath.Reverse();
-            selectedUnit.GetComponent<UnitScript>().path = currentPath;
+        //hozzáadjuk a céltól a startig
+        while (curr != null)
+        {
+            currentPath.Add(curr);
+            curr = prev[curr];
+        }
+        //megforditjuk
+        currentPath.Reverse();
+        selectedUnit.GetComponent<UnitScript>().path = currentPath;
     }
 
     public HashSet<Node> getActualMovementOptions(GameObject unit)

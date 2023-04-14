@@ -9,6 +9,7 @@ public class Minimax : MonoBehaviour
     Position globalBestMove;
     double globalBestScore;
     int maxDepth;
+    List<Step> lastSteps;
 
     public Position minimax(TileMap map, bool maxPlayer, int depth, double alpha, double beta, int selectedAINumber, int selectedPlayerNumber) {
         VirtualMap virtualMap = new VirtualMap(map, map.mapSizeX, map.mapSizeY, selectedAINumber, selectedPlayerNumber);
@@ -33,20 +34,22 @@ public class Minimax : MonoBehaviour
             foreach (Position option in options)
             {
                 map.doMove(option, map.CurrentUnit);
-                GameManager.LogState(depth, map.idsToAIUnits[0]);
                 double score = minimax_r(map, false, depth - 1, alpha, beta);
+                if (depth == maxDepth)
+                {
+                    GameManager.LogState(depth, map.idsToAIUnits[0], score);
+                }
                 map.redoMove();
-                bestScore = Math.Max(score, bestScore);
                 if(bestScore < score)
                 {
                     bestScore = score;
                     bestMove = option;
                 }
-                alpha = Math.Max(alpha, bestScore);
-                if (beta <= alpha)
-                {
-                    break;
-                }
+                //alpha = Math.Max(alpha, bestScore);
+                //if (beta <= alpha)
+                //{
+                //    break;
+                //}
             }
             if (depth == maxDepth && globalBestScore < bestScore)
             {
@@ -64,11 +67,11 @@ public class Minimax : MonoBehaviour
                 double score = minimax_r(map, true, depth - 1, alpha, beta);
                 map.redoMove();
                 bestScore = Math.Min(score, bestScore);
-                alpha = Math.Min(alpha, bestScore);
-                if (beta <= alpha)
-                {
-                    break;
-                }
+                //alpha = Math.Min(alpha, bestScore);
+                //if (beta <= alpha)
+                //{
+                //    break;
+                //}
             }
 
             return bestScore;
@@ -85,7 +88,14 @@ public class Minimax : MonoBehaviour
         {
             totalScore = totalScore + step.score;
         }
-        
+
+        GameManager.Log(totalScore.ToString());
+
+        //if (GameManager._isDebugModeOn)
+        //{
+        //    lastSteps = new List<Step>(steps);
+        //}
+
         return totalScore;
     }
 }
