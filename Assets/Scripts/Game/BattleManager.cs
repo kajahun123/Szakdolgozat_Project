@@ -1,4 +1,5 @@
 using Assets.Scripts.Game;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,7 +11,7 @@ public class BattleManager : MonoBehaviour
     private bool battleStatus = false;
 
     //attacker: támadó fél, receiver:védekezõ fél
-    public IEnumerator Attack(GameObject unit, GameObject enemy)
+    public IEnumerator Attack(GameObject unit, GameObject enemy, Action callBack)
     {
         battleStatus = true;
 
@@ -21,6 +22,7 @@ public class BattleManager : MonoBehaviour
             Battle(unit, enemy);
             yield return new WaitForEndOfFrame();
         }
+        callBack();
     }
 
     public void Battle(GameObject attacker, GameObject receiver)

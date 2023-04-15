@@ -1,4 +1,5 @@
 using Assets.Scripts.Game;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -151,7 +152,7 @@ public class UnitScript : MonoBehaviour
         }
     }
 
-    public void MoveToNextTile()
+    public void MoveToNextTile(Action callBack)
     {
         if(path.Count == 0)
         {
@@ -159,11 +160,11 @@ public class UnitScript : MonoBehaviour
         }
         else
         {
-            StartCoroutine(MoveOverSeconds(transform.gameObject, path[path.Count - 1]));
+            StartCoroutine(MoveOverSeconds(transform.gameObject, path[path.Count - 1],callBack));
         }
     }
 
-    public IEnumerator MoveOverSeconds(GameObject objectToMove, Node endNode)
+    public IEnumerator MoveOverSeconds(GameObject objectToMove, Node endNode, Action callBack)
     {
         movementQueue.Enqueue(1);
         path.RemoveAt(0);
@@ -185,6 +186,7 @@ public class UnitScript : MonoBehaviour
         tileBeingOccupied.GetComponent<ClickableTile>().unitOnTile = null;
         tileBeingOccupied = map.tilesOnMap[x, y];
         movementQueue.Dequeue();
+        callBack();
     }
 
     public void GetDamage(int damage)

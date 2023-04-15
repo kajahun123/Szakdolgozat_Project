@@ -11,7 +11,8 @@ public class Minimax : MonoBehaviour
     int maxDepth;
     List<Step> lastSteps;
 
-    public Position minimax(TileMap map, bool maxPlayer, int depth, double alpha, double beta, int selectedAINumber, int selectedPlayerNumber) {
+    public Position minimax(TileMap map, bool maxPlayer, int depth, double alpha, double beta, int selectedAINumber, int selectedPlayerNumber)
+    {
         VirtualMap virtualMap = new VirtualMap(map, map.mapSizeX, map.mapSizeY, selectedAINumber, selectedPlayerNumber);
         globalBestScore = int.MinValue;
         maxDepth = depth;
@@ -40,16 +41,16 @@ public class Minimax : MonoBehaviour
                     GameManager.LogState(depth, map.idsToAIUnits[0], score);
                 }
                 map.redoMove();
-                if(bestScore < score)
+                if (bestScore < score)
                 {
                     bestScore = score;
                     bestMove = option;
                 }
-                //alpha = Math.Max(alpha, bestScore);
-                //if (beta <= alpha)
-                //{
-                //    break;
-                //}
+                alpha = Math.Max(alpha, bestScore);
+                if (beta <= alpha)
+                {
+                    break;
+                }
             }
             if (depth == maxDepth && globalBestScore < bestScore)
             {
@@ -67,11 +68,11 @@ public class Minimax : MonoBehaviour
                 double score = minimax_r(map, true, depth - 1, alpha, beta);
                 map.redoMove();
                 bestScore = Math.Min(score, bestScore);
-                //alpha = Math.Min(alpha, bestScore);
-                //if (beta <= alpha)
-                //{
-                //    break;
-                //}
+                alpha = Math.Min(alpha, bestScore);
+                if (beta <= alpha)
+                {
+                    break;
+                }
             }
 
             return bestScore;

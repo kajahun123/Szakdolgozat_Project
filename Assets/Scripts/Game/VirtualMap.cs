@@ -77,7 +77,7 @@ namespace Assets.Scripts.Game
 
         public void doMove(Position move, UnitScript unit)
         {
-            if (IsFieldEmpty(move.x,move.y))
+            if (IsFieldEmpty(move.x, move.y))
             {
                 UnitState lastState = unit.states.Peek();
                 UnitState newState = new UnitState(lastState);
@@ -105,7 +105,10 @@ namespace Assets.Scripts.Game
                 throw new Exception("Cannot make a step!");
             }
 
+            //if (IsGameOver())
+            //{
             NextTurn();
+            //}
         }
 
         private void NextTurn()
@@ -113,37 +116,42 @@ namespace Assets.Scripts.Game
             if (currentTeam == Team.AI)
             {
                 currentTeam = Team.Player;
-                int i = currentPlayerId + 1;
-                while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead)
+                if (HasTeamLivingUnits(currentTeam))
                 {
-                    if (i >= maxPlayerId)
+                    int i = currentPlayerId + 1;
+                    while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead)
                     {
-                        i = 0;
+                        if (i >= maxPlayerId)
+                        {
+                            i = 0;
+                        }
+                        else
+                        {
+                            i++;
+                        }
                     }
-                    else
-                    {
-                        i++;
-                    }
+                    currentPlayerId = i;
                 }
-                currentPlayerId = i;
             }
             else if (currentTeam == Team.Player)
             {
                 currentTeam = Team.AI;
-                int i = currentAIId + 1;
-                while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].IsDead)
+                if (HasTeamLivingUnits(currentTeam))
                 {
-                    if (i >= maxAIId)
+                    int i = currentAIId + 1;
+                    while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].VIsDead)
                     {
-                        i = 0;
+                        if (i >= maxAIId)
+                        {
+                            i = 0;
+                        }
+                        else
+                        {
+                            i++;
+                        }
                     }
-                    else
-                    {
-                        i++;
-                    }
+                    currentAIId = i;
                 }
-
-                currentAIId = i;
             }
         }
 
@@ -152,38 +160,69 @@ namespace Assets.Scripts.Game
             if (currentTeam == Team.AI)
             {
                 currentTeam = Team.Player;
-                int i = currentPlayerId - 1;
-                while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead)
+                if (HasTeamLivingUnits(currentTeam))
                 {
-                    if (i <= 0)
+                    int i = currentPlayerId - 1;
+                    while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead)
                     {
-                        i = maxPlayerId;
+                        if (i <= 0)
+                        {
+                            i = maxPlayerId;
+                        }
+                        else
+                        {
+                            i--;
+                        }
                     }
-                    else
-                    {
-                        i--;
-                    }
+                    currentPlayerId = i;
                 }
-                currentPlayerId = i;
             }
             else if (currentTeam == Team.Player)
             {
                 currentTeam = Team.AI;
-                int i = currentAIId - 1;
-                while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].IsDead)
+                if (HasTeamLivingUnits(currentTeam))
                 {
-                    if (i <= 0)
+                    int i = currentAIId - 1;
+                    while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].VIsDead)
                     {
-                        i = maxAIId;
+                        if (i <= 0)
+                        {
+                            i = maxAIId;
+                        }
+                        else
+                        {
+                            i--;
+                        }
                     }
-                    else
+                    currentAIId = i;
+                }
+            }
+        }
+
+        public bool HasTeamLivingUnits(Team team)
+        {
+            if (team == Team.Player)
+            {
+                foreach (var idToPlayer in idsToPlayerUnits)
+                {
+                    if (!idToPlayer.Value.VIsDead)
                     {
-                        i--;
+                        return true;
                     }
                 }
-
-                currentAIId = i;
             }
+            else
+            {
+                foreach (var idToAi in idsToAIUnits)
+                {
+                    if (!idToAi.Value.VIsDead)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         public int GetScoreByDamage(UnitScript unit)
@@ -301,30 +340,7 @@ namespace Assets.Scripts.Game
 
         public bool IsGameOver()
         {
-            bool teamHasUnit = false;
-            foreach (var idToPlayer in idsToPlayerUnits)
-            {
-                if (!idToPlayer.Value.VIsDead)
-                {
-                    teamHasUnit = true;
-                    break;
-                }
-            }
-
-            if (!teamHasUnit)
-            {
-                return true;
-            }
-
-            foreach (var idToAi in idsToAIUnits)
-            {
-                if (!idToAi.Value.VIsDead)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return !HasTeamLivingUnits(Team.Player) || !HasTeamLivingUnits(Team.AI);
         }
 
     }

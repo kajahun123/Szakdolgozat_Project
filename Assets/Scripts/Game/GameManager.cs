@@ -154,16 +154,21 @@ public class GameManager : MonoBehaviour
     {
         foreach (Transform u in playerTeam.transform)
         {
-            UnitScript unit = u.gameObject.GetComponent<UnitScript>();
+            if (u.gameObject.activeInHierarchy)
+            {
+                UnitScript unit = u.gameObject.GetComponent<UnitScript>();
 
-            idsToPlayerUnits.Add(unit.id, unit);
-
+                idsToPlayerUnits.Add(unit.id, unit);
+            }
         }
         foreach (Transform u in aiTeam.transform)
         {
-            UnitScript unit = u.gameObject.GetComponent<UnitScript>();
+            if (u.gameObject.activeInHierarchy)
+            {
+                UnitScript unit = u.gameObject.GetComponent<UnitScript>();
 
-            idsToAIUnits.Add(unit.id, unit);
+                idsToAIUnits.Add(unit.id, unit);
+            }
         }
     }
 
@@ -263,20 +268,24 @@ public class GameManager : MonoBehaviour
         bool enemyTeamAlive = false;
         foreach (Transform u in playerTeam.transform)
         {
-            //Debug.Log("Win: " + u.GetComponent<UnitScript>().UnitName);
-            if (!u.GetComponent<UnitScript>().IsDead)
+            if (u.gameObject.activeInHierarchy)
             {
-                playerTeamAlive = true;
-                break;
+                if (!u.GetComponent<UnitScript>().IsDead)
+                {
+                    playerTeamAlive = true;
+                    break;
+                }
             }
         }
         foreach (Transform u in aiTeam.transform)
         {
-            //Debug.Log("Win: " + u.GetComponent<UnitScript>().UnitName);
-            if (!u.GetComponent<UnitScript>().IsDead)
+            if (u.gameObject.activeInHierarchy)
             {
-                enemyTeamAlive = true;
-                break;
+                if (!u.GetComponent<UnitScript>().IsDead)
+                {
+                    enemyTeamAlive = true;
+                    break;
+                }
             }
         }
 
