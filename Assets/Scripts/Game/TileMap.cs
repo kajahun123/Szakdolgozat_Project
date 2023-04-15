@@ -388,7 +388,7 @@ public class TileMap : MonoBehaviour
         {
             isAIWorking = true;
             UnitScript unit = selectedUnit.GetComponent<UnitScript>();
-            Position bestMove = AI.minimax(this, true, 3, double.MinValue, double.MaxValue, GM.currentAIId, GM.currentPlayerId);
+            Position bestMove = AI.MinMax(this, true, 3, double.MinValue, double.MaxValue, GM.currentAIId, GM.currentPlayerId);
             if (tilesOnMap[bestMove.x, bestMove.y].GetComponent<ClickableTile>().unitOnTile == null)
             {
                 generatePathTo(bestMove.x, bestMove.y);

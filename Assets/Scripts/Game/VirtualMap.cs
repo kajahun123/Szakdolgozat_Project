@@ -77,7 +77,7 @@ namespace Assets.Scripts.Game
 
         public void doMove(Position move, UnitScript unit)
         {
-            if (IsFieldEmpty(move.x, move.y))
+            if (IsFieldEmpty(move.x, move.y) || unit.VX == move.x && unit.VY == move.y)
             {
                 UnitState lastState = unit.states.Peek();
                 UnitState newState = new UnitState(lastState);
@@ -277,7 +277,7 @@ namespace Assets.Scripts.Game
         public bool IsValidMove(UnitScript unit, int targetX, int targetY)
         {
             int distance = GetDistance(unit.VX, unit.VY, targetX, targetY);
-            if (distance <= unit.movementRange && IsFieldEmpty(targetX, targetY))
+            if (distance <= unit.movementRange && (IsFieldEmpty(targetX, targetY) || distance == 0))
             {
                 return true;
             }

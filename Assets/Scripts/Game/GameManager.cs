@@ -42,6 +42,8 @@ public class GameManager : MonoBehaviour
     {
         UnitScript.nextAvailablePlayerId = 0;
         UnitScript.nextAvailableAIId = 0;
+        currentPlayerId = 0;
+        currentAIId = -1;
     }
     public void Start()
     {

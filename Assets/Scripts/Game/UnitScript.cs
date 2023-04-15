@@ -17,6 +17,7 @@ public class UnitScript : MonoBehaviour
 
     public GameObject tileBeingOccupied;
 
+    [HideInInspector]
     public string UnitName;
     public int movementRange = 2;
     public int attackRange = 1;
@@ -101,6 +102,7 @@ public class UnitScript : MonoBehaviour
         combatQueue = new Queue<int>();
         unitMovementState = MovementState.Unselected;
         currentHealthPoints = maxHealthPoints;
+        UnitName = gameObject.name;
         hitPointsText.SetText(currentHealthPoints.ToString());
         if (team == Team.Player)
         {
