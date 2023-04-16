@@ -126,7 +126,13 @@ public class TileMap : MonoBehaviour
         {
             for (int y = 0; y < mapSizeY; y++)
             {
-                tiles[x, y] = UnityEngine.Random.Range(0, 6) == 3 ? 1 : 0;
+                if (x < mapSizeX-2 && x > 1 && y < mapSizeY-1 && y > 0)
+                {
+                    if (tiles[x + 1, y] == 0 & tiles[x - 1, y] == 0 && tiles[x, y + 1] == 0 && tiles[x, y - 1] == 0)
+                    {
+                        tiles[x, y] = UnityEngine.Random.Range(0, 2) == 0 ? 1 : 0;
+                    }
+                }
                 //tiles[x, y] = 0;
             }
         }
