@@ -350,7 +350,7 @@ public class TileMap : MonoBehaviour
                     int clickedTileX = hit.transform.GetComponent<ClickableTile>().tileX;
                     int clickedTileY = hit.transform.GetComponent<ClickableTile>().tileY;
                     Node nodeToCeck = graph[clickedTileX, clickedTileY];
-
+                    UnitScript unit = selectedUnit.GetComponent<UnitScript>();
                     if ((hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile == null || hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile == selectedUnit) && (selectedUnitMoveRange.Contains(nodeToCeck)))
                     {
                         generatePathTo(clickedTileX, clickedTileY);
@@ -358,7 +358,7 @@ public class TileMap : MonoBehaviour
                         //finalizeOption();
                         //StartCoroutine(moveUnitAndFinalize());
                     }
-                    if (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile != null && (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().team != selectedUnit.GetComponent<UnitScript>().team) && (attackableTiles.Contains(nodeToCeck)))
+                    else if (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile != null && (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().team != selectedUnit.GetComponent<UnitScript>().team) && (attackableTiles.Contains(nodeToCeck)))
                     {
                         if (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints > 0)
                         {
@@ -366,9 +366,16 @@ public class TileMap : MonoBehaviour
                             //finalizeMovementPosition();
                         }
                     }
+                    else if (unit.x == clickedTileX && unit.y == clickedTileY)
+                    {
+                        generatePathTo(clickedTileX, clickedTileY);
+                        moveUnit(finalizeMovementPosition);
+                    }
+
                 }
                 else if (hit.transform.parent.gameObject.CompareTag("Unit"))
                 {
+                    UnitScript unit = selectedUnit.GetComponent<UnitScript>();
                     GameObject unitClicked = hit.transform.parent.gameObject;
                     int unitX = unitClicked.GetComponent<UnitScript>().x;
                     int unitY = unitClicked.GetComponent<UnitScript>().y;
@@ -380,6 +387,11 @@ public class TileMap : MonoBehaviour
                             //StartCoroutine(attackUnitAndFinalize(selectedUnit));
                             StartCoroutine(BM.Attack(selectedUnit, unitClicked, finalizeMovementPosition));
                         }
+                    }
+                    else if (unit.x == unitX && unit.y == unitY)
+                    {
+                        generatePathTo(unitX, unitY);
+                        moveUnit(finalizeMovementPosition);
                     }
                 }
             }
@@ -401,9 +413,10 @@ public class TileMap : MonoBehaviour
                 StartCoroutine(BM.Attack(selectedUnit, tilesOnMap[bestMove.x, bestMove.y].GetComponent<ClickableTile>().unitOnTile, finalizeMovementPosition));
                 //StartCoroutine(attackUnitAndFinalize(selectedUnit));
             }
-            else
+            else if(bestMove.x == unit.x && bestMove.y == unit.y)
             {
-                throw new Exception("Can't do move");
+                generatePathTo(bestMove.x, bestMove.y);
+                moveUnit(finalizeMovementPosition);
             }
         }
     }

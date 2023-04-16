@@ -158,7 +158,7 @@ public class UnitScript : MonoBehaviour
     {
         if(path.Count == 0)
         {
-            return;
+            callBack();
         }
         else
         {
