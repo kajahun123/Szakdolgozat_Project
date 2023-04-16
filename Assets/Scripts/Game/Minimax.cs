@@ -37,10 +37,10 @@ public class Minimax : MonoBehaviour
             {
                 map.doMove(option, map.CurrentUnit);
                 double score = MinMax_R(map, false, depth - 1, alpha, beta);
-                if (depth == maxDepth)
-                {
-                    GameManager.LogState(depth, map.idsToAIUnits[0], score);
-                }
+                //if (depth == maxDepth)
+                //{
+                //    GameManager.LogState(depth, map.idsToAIUnits[0], score);
+                //}
                 map.redoMove();
                 if (bestScore < score)
                 {

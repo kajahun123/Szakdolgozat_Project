@@ -130,7 +130,7 @@ public class TileMap : MonoBehaviour
                 {
                     if (tiles[x + 1, y] == 0 & tiles[x - 1, y] == 0 && tiles[x, y + 1] == 0 && tiles[x, y - 1] == 0)
                     {
-                        tiles[x, y] = UnityEngine.Random.Range(0, 2) == 0 ? 1 : 0;
+                        tiles[x, y] = UnityEngine.Random.Range(0, 5) == 3 ? 1 : 0;
                     }
                 }
                 //tiles[x, y] = 0;

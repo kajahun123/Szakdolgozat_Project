@@ -142,7 +142,7 @@ namespace Assets.Scripts.Game
                 UnitScript target = table[move.x, move.y];
                 VirtualAttack(unit, target);
                 //int attackScore = 0;
-                int attackScore = GetScoreByDamage(unit,target);
+                int attackScore = GetScoreByDamage(unit, target);
                 Step step = new Step(Step.Type.Attack, target, attackScore, unit);
                 steps.Push(step);
             }
