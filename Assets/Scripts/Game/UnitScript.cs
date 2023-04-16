@@ -1,3 +1,5 @@
+using Assets.Scripts.Game;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -6,7 +8,8 @@ using UnityEngine.UI;
 
 public class UnitScript : MonoBehaviour
 {
-    public int team;
+    public int id;
+    public Team team;
     public int x;
     public int y;
 
@@ -14,15 +17,30 @@ public class UnitScript : MonoBehaviour
 
     public GameObject tileBeingOccupied;
 
+    [HideInInspector]
     public string UnitName;
-    public int moveSpeed = 2;
+    public int movementRange = 2;
     public int attackRange = 1;
     public int attackDamage = 1;
     public int maxHealthPoints = 5;
     public int currentHealthPoints;
     public Sprite unitSprite;
 
-    public bool isDead = false;
+    public bool IsDead
+    {
+        get
+        {
+            return currentHealthPoints <= 0;
+        }
+    }
+
+    public bool VIsDead
+    {
+        get
+        {
+            return states.Peek().healthPoint <= 0;
+        }
+    }
     public bool isTurn = false;
     public List<Node> path = null;
 
@@ -37,14 +55,43 @@ public class UnitScript : MonoBehaviour
 
     public TileMap map;
 
-    public enum movementStates
+    public Stack<UnitState> states = new Stack<UnitState>();
+
+    public int VX
     {
-        Unselected,
-        Selected,
-        Moved
+        get
+        {
+            return states.Peek().x;
+        }
+    }
+    public int VY
+    {
+        get
+        {
+            return states.Peek().y;
+        }
     }
 
-    public movementStates unitMovementState;
+    public MovementState unitMovementState;
+
+    public static int nextAvailablePlayerId;
+    public static int nextAvailableAIId;
+
+    public static int PlayerCount
+    {
+        get
+        {
+            return nextAvailablePlayerId;
+        }
+    }
+
+    public static int AICount
+    {
+        get
+        {
+            return nextAvailableAIId;
+        }
+    }
 
     private void Awake()
     {
@@ -53,9 +100,20 @@ public class UnitScript : MonoBehaviour
 
         movementQueue = new Queue<int>();
         combatQueue = new Queue<int>();
-        unitMovementState = movementStates.Unselected;
+        unitMovementState = MovementState.Unselected;
         currentHealthPoints = maxHealthPoints;
+        UnitName = gameObject.name;
         hitPointsText.SetText(currentHealthPoints.ToString());
+        if (team == Team.Player)
+        {
+            id = nextAvailablePlayerId;
+            ++nextAvailablePlayerId;
+        }
+        else if(team == Team.AI)
+        {
+            id = nextAvailableAIId;
+            ++nextAvailableAIId;
+        }
     }
 
     public void LateUpdate()
@@ -63,53 +121,52 @@ public class UnitScript : MonoBehaviour
         healthBarCanvas.transform.forward = Camera.main.transform.forward;
     }
 
-    public movementStates GetMovementState(int i)
+    public MovementState GetMovementState(int i)
     {
         if (i == 0)
         {
-            return movementStates.Unselected;
+            return MovementState.Unselected;
         }
         if(i == 1)
         {
-            return movementStates.Selected;
+            return MovementState.Selected;
         }
         if(i == 2)
         {
-            return movementStates.Moved;
+            return MovementState.Moved;
         }
-        return movementStates.Unselected;
+        return MovementState.Unselected;
     }
 
     public void SetMovementState(int i)
     {
         if (i == 0)
         {
-            unitMovementState = movementStates.Unselected;
+            unitMovementState = MovementState.Unselected;
         }
         if (i == 1)
         {
-           unitMovementState =  movementStates.Selected;
+           unitMovementState =  MovementState.Selected;
         }
         if (i == 2)
         {
-            unitMovementState = movementStates.Moved;
+            unitMovementState = MovementState.Moved;
         }
     }
 
-    public void MoveToNextTile()
+    public void MoveToNextTile(Action callBack)
     {
-        Debug.Log(path.Count);
         if(path.Count == 0)
         {
-            return;
+            callBack();
         }
         else
         {
-            StartCoroutine(MoveOverSeconds(transform.gameObject, path[path.Count - 1]));
+            StartCoroutine(MoveOverSeconds(transform.gameObject, path[path.Count - 1],callBack));
         }
     }
 
-    public IEnumerator MoveOverSeconds(GameObject objectToMove, Node endNode)
+    public IEnumerator MoveOverSeconds(GameObject objectToMove, Node endNode, Action callBack)
     {
         movementQueue.Enqueue(1);
         path.RemoveAt(0);
@@ -131,6 +188,7 @@ public class UnitScript : MonoBehaviour
         tileBeingOccupied.GetComponent<ClickableTile>().unitOnTile = null;
         tileBeingOccupied = map.tilesOnMap[x, y];
         movementQueue.Dequeue();
+        callBack();
     }
 
     public void GetDamage(int damage)
@@ -150,8 +208,7 @@ public class UnitScript : MonoBehaviour
         {
             yield return new WaitForEndOfFrame();
         }
-        isDead = true;
-        hideUnit();
+        this.gameObject.SetActive(false);
         GameObject tile = gameObject.GetComponent<UnitScript>().tileBeingOccupied;
         tile.GetComponent<ClickableTile>().unitOnTile = null;
         gameObject.GetComponent<UnitScript>().tileBeingOccupied = null;
@@ -162,11 +219,5 @@ public class UnitScript : MonoBehaviour
     {
         healthBar.fillAmount = (float)currentHealthPoints / maxHealthPoints;
         hitPointsText.SetText(currentHealthPoints.ToString());
-    }
-
-    public void hideUnit()
-    {
-        foreach (Transform child in transform)
-            child.gameObject.SetActive(false);
     }
 }

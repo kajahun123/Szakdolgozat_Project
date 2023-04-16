@@ -9,4 +9,6 @@ public class ClickableTile : MonoBehaviour
 
     public GameObject unitOnTile;
     public TileMap map;
+
+    public bool isWalkable;
 }

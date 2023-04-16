@@ -1,3 +1,4 @@
+using Assets.Scripts.Game;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,7 +11,7 @@ public class GameManager : MonoBehaviour
 
     public TileMap TM;
 
-    public int currentTeam;
+    public Team currentTeam;
     public int numberOfTeams = 2;
 
     public int selectedXTile;
@@ -19,15 +20,43 @@ public class GameManager : MonoBehaviour
     public int cursorX;
     public int cursorY;
 
-    public GameObject team1;
-    public GameObject team2;
+    public GameObject playerTeam;
+    public GameObject aiTeam;
 
-    public List<GameObject> turnQueue = new List<GameObject>();
+    public List<GameObject> playerTurnQueue = new List<GameObject>();
+    public List<GameObject> enemyTurnQueue = new List<GameObject>();
 
+    public bool isLoggingOn = true;
+    public static bool _isDebugModeOn;
+
+    public int currentPlayerId;
+    public int currentAIId;
+
+    public Dictionary<int, UnitScript> idsToPlayerUnits = new Dictionary<int, UnitScript>();
+    public Dictionary<int, UnitScript> idsToAIUnits = new Dictionary<int, UnitScript>();
+
+    public int playerCount;
+    public int enemyCount;
+
+    public void Awake()
+    {
+        UnitScript.nextAvailablePlayerId = 0;
+        UnitScript.nextAvailableAIId = 0;
+        currentPlayerId = 0;
+        currentAIId = -1;
+    }
     public void Start()
     {
         TM = GetComponent<TileMap>();
-        addAllUnitsToQueue();
+        _isDebugModeOn = isLoggingOn;
+        addAllUnitsToDictionary();
+        FirstTurn();
+    }
+
+    public void FirstTurn()
+    {
+        currentTeam = Team.Player;
+        TM.SelectUnit(idsToPlayerUnits[0].gameObject);
     }
 
     public void Update()
@@ -37,13 +66,26 @@ public class GameManager : MonoBehaviour
         {
             CursorUiUpdate();
         }
+    }
 
-
-        if (turnQueue[0].GetComponent<UnitScript>().isTurn == true)
+    public static void Log(string message)
+    {
+        if (_isDebugModeOn)
         {
-            TM.SelectUnit(turnQueue[0]);
+            Debug.Log(message);
         }
     }
+
+    public static void LogState(int depth, UnitScript unit, double score)
+    {
+        string message = depth + ", " + unit.UnitName + " / " ;
+        foreach (UnitState state in unit.states)
+        {
+            message += "(" + state.x + ", " + state.y + ") ";
+        }
+        Log(message + ", " + score);
+    }
+
     public void CursorUiUpdate()
     {
         if (hit.transform.CompareTag("Tile"))
@@ -110,46 +152,83 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    
-
-    public void addAllUnitsToQueue()
+    public void addAllUnitsToDictionary()
     {
-        turnQueue.AddRange(GameObject.FindGameObjectsWithTag("Unit"));
-        for (int i = 0; i < turnQueue.Count; i++)
+        foreach (Transform u in playerTeam.transform)
         {
-            GameObject temp = turnQueue[i];
-            int randomIndex = Random.Range(i, turnQueue.Count);
-            turnQueue[i] = turnQueue[randomIndex];
-            turnQueue[randomIndex] = temp;
-        }
-        currentTeam = GetCurrentTeam(turnQueue[0]);
-        turnQueue[0].GetComponent<UnitScript>().isTurn = true;
-        TM.SelectUnit(turnQueue[0]);   
-    }
-
-    public void EndTurn()
-    {
-        turnQueue[0].GetComponent<UnitScript>().isTurn = false;
-
-        for (int i = 0; i < turnQueue.Count; i++)
-        {
-            if (turnQueue[i].GetComponent<UnitScript>().isDead)
+            if (u.gameObject.activeInHierarchy)
             {
-                turnQueue.RemoveAt(i);
-                //azért kell csökkenteni az i-t hogy ne ugorjuk át a következõ elemet
-                i--;
+                UnitScript unit = u.gameObject.GetComponent<UnitScript>();
+
+                idsToPlayerUnits.Add(unit.id, unit);
             }
         }
+        foreach (Transform u in aiTeam.transform)
+        {
+            if (u.gameObject.activeInHierarchy)
+            {
+                UnitScript unit = u.gameObject.GetComponent<UnitScript>();
 
-        turnQueue.Add(turnQueue[0]);
-        turnQueue.RemoveAt(0);
-        currentTeam = GetCurrentTeam(turnQueue[0]);
-        turnQueue[0].GetComponent<UnitScript>().isTurn = true;
-        Debug.Log("CurrentTeam: " + currentTeam);
-        
+                idsToAIUnits.Add(unit.id, unit);
+            }
+        }
     }
 
-    public int GetCurrentTeam(GameObject selectedUnit)
+    public void switchCurrentPlayer()
+    {
+        if(currentTeam == Team.Player)
+        {
+            currentTeam = Team.AI;
+        }
+        else if(currentTeam == Team.AI)
+        {
+            currentTeam = Team.Player;
+        }
+    }
+
+    public void NextTurn()
+    {
+        if (currentTeam == Team.AI)
+        {
+            currentTeam = Team.Player;
+            int i = currentPlayerId + 1;
+            while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].IsDead)
+            {
+                if (i >= UnitScript.PlayerCount - 1)
+                {
+                    i = 0;
+                }
+                else
+                {
+                    i++;
+                }
+            }
+            currentPlayerId = i;
+            TM.SelectUnit(idsToPlayerUnits[currentPlayerId].gameObject);
+            //átadni a tileMapnak az id-t
+        }
+        else if (currentTeam == Team.Player)
+        {
+            currentTeam = Team.AI;
+            int i = currentAIId + 1;
+            while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].IsDead)
+            {
+                if (i >= UnitScript.AICount - 1)
+                {
+                    i = 0;
+                }
+                else
+                {
+                    i++;
+                }
+            }
+            currentAIId = i;
+            TM.SelectUnit(idsToAIUnits[currentAIId].gameObject);
+            //átadni a tileMapnak az id-t
+        }
+    }
+
+    public Team GetCurrentTeam(GameObject selectedUnit)
     {
         return selectedUnit.GetComponent<UnitScript>().team;
     }
@@ -159,11 +238,11 @@ public class GameManager : MonoBehaviour
         GameObject teamToReturn = null;
         if (team == 0)
         {
-            teamToReturn = team1;
+            teamToReturn = playerTeam;
         }
         else if (team == 1)
         {
-            teamToReturn = team2;
+            teamToReturn = aiTeam;
         }
 
         return teamToReturn;
@@ -172,6 +251,7 @@ public class GameManager : MonoBehaviour
     public void cechkIfUnitsRemain(GameObject unit, GameObject enemy)
     {
         StartCoroutine(checkIfUnitsRemainedCoroutine(unit, enemy));
+
     }
 
     public IEnumerator checkIfUnitsRemainedCoroutine(GameObject unit, GameObject enemy)
@@ -188,34 +268,68 @@ public class GameManager : MonoBehaviour
         //Debug.Log("team: " + team1.transform.);
         bool playerTeamAlive = false;
         bool enemyTeamAlive = false;
-        foreach (Transform u in team1.transform)
+        foreach (Transform u in playerTeam.transform)
         {
-            //Debug.Log("Win: " + u.GetComponent<UnitScript>().UnitName);
-            if (!u.GetComponent<UnitScript>().isDead)
+            if (u.gameObject.activeInHierarchy)
             {
-                playerTeamAlive = true;
-                break;
+                if (!u.GetComponent<UnitScript>().IsDead)
+                {
+                    playerTeamAlive = true;
+                    break;
+                }
             }
         }
-        foreach (Transform u in team2.transform)
+        foreach (Transform u in aiTeam.transform)
         {
-            //Debug.Log("Win: " + u.GetComponent<UnitScript>().UnitName);
-            if (!u.GetComponent<UnitScript>().isDead)
+            if (u.gameObject.activeInHierarchy)
             {
-                enemyTeamAlive = true;
-                break;
+                if (!u.GetComponent<UnitScript>().IsDead)
+                {
+                    enemyTeamAlive = true;
+                    break;
+                }
             }
         }
 
         if (playerTeamAlive == false)
         {
-            Debug.Log("Gép nyert");
+            yield return -1;
         }
         else if (enemyTeamAlive == false)
-        {
-            Debug.Log("Játékos nyert");
+        { 
+            yield return 1;
         }
     }
+
+    public bool IsGameOver()
+    {
+        bool teamHasUnit = false;
+        foreach (var idToPlayer in idsToPlayerUnits)
+        {
+            if (!idToPlayer.Value.IsDead)
+            {
+                teamHasUnit = true;
+                break;
+            }
+        }
+
+        if (!teamHasUnit)
+        {
+            return true;
+        }
+
+        foreach (var idToAi in idsToAIUnits)
+        {
+            if (!idToAi.Value.IsDead)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
 
 
 }
