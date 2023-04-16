@@ -17,8 +17,54 @@ namespace Assets.Scripts.Game
         {
             get
             {
-                return currentTeam == Team.Player ? idsToPlayerUnits[currentPlayerId] : idsToAIUnits[currentAIId];
+                //getCurrentOrNextAlive(team)
+                return currentTeam == Team.Player ? idsToPlayerUnits[GetCurrentOrNextAlive(Team.Player)] : idsToAIUnits[GetCurrentOrNextAlive(Team.AI)];
             }
+        }
+
+        public int GetCurrentOrNextAlive(Team team)
+        {
+            if (team == Team.AI)
+            {
+                if (HasTeamLivingUnits(team))
+                {
+                    int i = currentAIId;
+                    while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].VIsDead)
+                    {
+                        if (i >= maxAIId)
+                        {
+                            i = 0;
+                        }
+                        else
+                        {
+                            i++;
+                        }
+                    }
+                    return i;
+                }
+            }
+            else if (team == Team.Player)
+            {
+                if (HasTeamLivingUnits(team))
+                {
+                    int i = currentPlayerId;
+                    while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead)
+                    {
+                        if (i >= maxPlayerId)
+                        {
+                            i = 0;
+                        }
+                        else
+                        {
+                            i++;
+                        }
+                    }
+                    currentPlayerId = i;
+                    return i;
+                }
+            }
+
+            return 0;
         }
         public TileMap originalMap;
         public int currentAIId;
@@ -96,7 +142,7 @@ namespace Assets.Scripts.Game
                 UnitScript target = table[move.x, move.y];
                 VirtualAttack(unit, target);
                 //int attackScore = 0;
-                int attackScore = GetScoreByDamage(unit);
+                int attackScore = GetScoreByDamage(unit,target);
                 Step step = new Step(Step.Type.Attack, target, attackScore, unit);
                 steps.Push(step);
             }
@@ -225,14 +271,22 @@ namespace Assets.Scripts.Game
             return false;
         }
 
-        public int GetScoreByDamage(UnitScript unit)
+        public int GetScoreByDamage(UnitScript unit, UnitScript target)
         {
             if (unit.team == Team.Player)
             {
+                if (target.VIsDead)
+                {
+                    return -10;
+                }
                 return -unit.attackDamage;
             }
             else
             {
+                if (target.VIsDead)
+                {
+                    return 10;
+                }
                 return unit.attackDamage;
             }
         }

@@ -66,6 +66,7 @@ public class TileMap : MonoBehaviour
     public GameObject tempUnit;
     public GameObject tempEnemy;
     public int tempHP;
+    public int depth = 3;
 
     private bool isGameOver;
 
@@ -266,7 +267,7 @@ public class TileMap : MonoBehaviour
         }
     }
 
-   
+
 
     public void SelectUnit(GameObject unit)
     {
@@ -309,10 +310,13 @@ public class TileMap : MonoBehaviour
         //Moved állapotba tesszük
         selectedUnit.GetComponent<UnitScript>().SetMovementState(2);
         deselectUnit();
-        GM.NextTurn();
+        if (!GM.IsGameOver())
+        {
+            GM.NextTurn();
+        }
     }
 
-    
+
     public void deselectUnit()
     {
         if (selectedUnit != null)
@@ -355,15 +359,12 @@ public class TileMap : MonoBehaviour
                     {
                         generatePathTo(clickedTileX, clickedTileY);
                         moveUnit(finalizeMovementPosition);
-                        //finalizeOption();
-                        //StartCoroutine(moveUnitAndFinalize());
                     }
                     else if (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile != null && (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().team != selectedUnit.GetComponent<UnitScript>().team) && (attackableTiles.Contains(nodeToCeck)))
                     {
                         if (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints > 0)
                         {
                             StartCoroutine(BM.Attack(selectedUnit, hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile, finalizeMovementPosition));
-                            //finalizeMovementPosition();
                         }
                     }
                     else if (unit.x == clickedTileX && unit.y == clickedTileY)
@@ -383,8 +384,6 @@ public class TileMap : MonoBehaviour
                     {
                         if (unitClicked.GetComponent<UnitScript>().currentHealthPoints > 0)
                         {
-                            //StartCoroutine(BM.Attack(selectedUnit, unitClicked));
-                            //StartCoroutine(attackUnitAndFinalize(selectedUnit));
                             StartCoroutine(BM.Attack(selectedUnit, unitClicked, finalizeMovementPosition));
                         }
                     }
@@ -400,20 +399,17 @@ public class TileMap : MonoBehaviour
         {
             isAIWorking = true;
             UnitScript unit = selectedUnit.GetComponent<UnitScript>();
-            Position bestMove = AI.MinMax(this, true, 3, double.MinValue, double.MaxValue, GM.currentAIId, GM.currentPlayerId);
+            Position bestMove = AI.MinMax(this, true, depth, double.MinValue, double.MaxValue, GM.currentAIId, GM.currentPlayerId);
             if (tilesOnMap[bestMove.x, bestMove.y].GetComponent<ClickableTile>().unitOnTile == null)
             {
                 generatePathTo(bestMove.x, bestMove.y);
                 moveUnit(finalizeMovementPosition);
-                //StartCoroutine(moveUnitAndFinalize());
             }
             else if (tilesOnMap[bestMove.x, bestMove.y].GetComponent<ClickableTile>().unitOnTile != null && tilesOnMap[bestMove.x, bestMove.y].GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().team != unit.team)
             {
-                // StartCoroutine(BM.Attack(selectedUnit, tilesOnMap[bestMove.x, bestMove.y].GetComponent<ClickableTile>().unitOnTile));
                 StartCoroutine(BM.Attack(selectedUnit, tilesOnMap[bestMove.x, bestMove.y].GetComponent<ClickableTile>().unitOnTile, finalizeMovementPosition));
-                //StartCoroutine(attackUnitAndFinalize(selectedUnit));
             }
-            else if(bestMove.x == unit.x && bestMove.y == unit.y)
+            else if (bestMove.x == unit.x && bestMove.y == unit.y)
             {
                 generatePathTo(bestMove.x, bestMove.y);
                 moveUnit(finalizeMovementPosition);

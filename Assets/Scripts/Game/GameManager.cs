@@ -192,9 +192,9 @@ public class GameManager : MonoBehaviour
         {
             currentTeam = Team.Player;
             int i = currentPlayerId + 1;
-            while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead)
+            while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].IsDead)
             {
-                if (currentPlayerId == UnitScript.PlayerCount - 1)
+                if (i >= UnitScript.PlayerCount - 1)
                 {
                     i = 0;
                 }
@@ -213,7 +213,7 @@ public class GameManager : MonoBehaviour
             int i = currentAIId + 1;
             while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].IsDead)
             {
-                if (currentAIId == UnitScript.AICount - 1)
+                if (i >= UnitScript.AICount - 1)
                 {
                     i = 0;
                 }

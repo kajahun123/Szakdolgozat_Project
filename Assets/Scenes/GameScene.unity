@@ -204,7 +204,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002928, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
       propertyPath: movementRange
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002943, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
       propertyPath: m_Name
@@ -582,7 +582,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002928, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
       propertyPath: movementRange
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002943, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
       propertyPath: m_Name
@@ -706,7 +706,7 @@ PrefabInstance:
       objectReference: {fileID: 1327768153}
     - target: {fileID: 2473645985043914799, guid: a0df384f0cdb594429909ffc45f95775, type: 3}
       propertyPath: movementRange
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2473645985043914799, guid: a0df384f0cdb594429909ffc45f95775, type: 3}
       propertyPath: healthBarCanvas
@@ -952,6 +952,7 @@ MonoBehaviour:
   tempUnit: {fileID: 0}
   tempEnemy: {fileID: 0}
   tempHP: 0
+  depth: 3
   isAIWorking: 0
   inMoving: 0
 --- !u!4 &1832099945
@@ -1107,7 +1108,7 @@ PrefabInstance:
       objectReference: {fileID: 2022759950}
     - target: {fileID: 2473645985043914799, guid: a0df384f0cdb594429909ffc45f95775, type: 3}
       propertyPath: movementRange
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2473645985043914799, guid: a0df384f0cdb594429909ffc45f95775, type: 3}
       propertyPath: healthBarCanvas
@@ -1232,7 +1233,7 @@ PrefabInstance:
       objectReference: {fileID: 1232282877}
     - target: {fileID: 2473645985043914799, guid: a0df384f0cdb594429909ffc45f95775, type: 3}
       propertyPath: movementRange
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2473645985043914799, guid: a0df384f0cdb594429909ffc45f95775, type: 3}
       propertyPath: healthBarCanvas
@@ -1285,7 +1286,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7161020086859427456, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 7161020086859427456, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1329,7 +1330,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002928, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
       propertyPath: movementRange
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002943, guid: 0391063358cd621489be5e3f266f7fc3, type: 3}
       propertyPath: m_Name
