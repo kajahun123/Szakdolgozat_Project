@@ -116,27 +116,7 @@ namespace Assets.Scripts.Game
             if (currentTeam == Team.AI)
             {
                 currentTeam = Team.Player;
-                if (HasTeamLivingUnits(currentTeam))
-                {
-                    int i = currentPlayerId + 1;
-                    while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead)
-                    {
-                        if (i >= maxPlayerId)
-                        {
-                            i = 0;
-                        }
-                        else
-                        {
-                            i++;
-                        }
-                    }
-                    currentPlayerId = i;
-                }
-            }
-            else if (currentTeam == Team.Player)
-            {
-                currentTeam = Team.AI;
-                if (HasTeamLivingUnits(currentTeam))
+                if (HasTeamLivingUnits(Team.AI))
                 {
                     int i = currentAIId + 1;
                     while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].VIsDead)
@@ -151,6 +131,26 @@ namespace Assets.Scripts.Game
                         }
                     }
                     currentAIId = i;
+                }
+            }
+            else if (currentTeam == Team.Player)
+            {
+                currentTeam = Team.AI;
+                if (HasTeamLivingUnits(Team.Player))
+                {
+                    int i = currentPlayerId + 1;
+                    while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead)
+                    {
+                        if (i >= maxPlayerId)
+                        {
+                            i = 0;
+                        }
+                        else
+                        {
+                            i++;
+                        }
+                    }
+                    currentPlayerId = i;
                 }
             }
         }
@@ -277,7 +277,7 @@ namespace Assets.Scripts.Game
         public bool IsValidMove(UnitScript unit, int targetX, int targetY)
         {
             int distance = GetDistance(unit.VX, unit.VY, targetX, targetY);
-            if (distance <= unit.movementRange && (IsFieldEmpty(targetX, targetY) || distance == 0))
+            if (distance <= unit.movementRange && (IsFieldEmpty(targetX, targetY)) || distance == 0)
             {
                 return true;
             }
@@ -300,8 +300,8 @@ namespace Assets.Scripts.Game
             UnitState currentState = lastStep.changingUnit.states.Peek();
             if (lastStep.type == Step.Type.Movement)
             {
-                table[currentState.x, currentState.y] = lastStep.changingUnit;
                 table[lastState.x, lastState.y] = null;
+                table[currentState.x, currentState.y] = lastStep.changingUnit;
             }
             else if (lastStep.type == Step.Type.Attack && lastState.healthPoint <= 0)
             {
