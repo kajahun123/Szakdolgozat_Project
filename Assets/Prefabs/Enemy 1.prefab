@@ -18,7 +18,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2473645984207771007
 Transform:
   m_ObjectHideFlags: 0
@@ -563,6 +563,10 @@ PrefabInstance:
     - target: {fileID: 8272244626243592393, guid: 72b7f3a091cbf1d4e865f58abff4e00f, type: 3}
       propertyPath: m_Name
       value: PT_Medieval_Male_Armor_Skeleton_01
+      objectReference: {fileID: 0}
+    - target: {fileID: 8272244626243592393, guid: 72b7f3a091cbf1d4e865f58abff4e00f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8272244626243828905, guid: 72b7f3a091cbf1d4e865f58abff4e00f, type: 3}
       propertyPath: m_RootOrder

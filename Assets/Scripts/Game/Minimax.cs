@@ -27,14 +27,15 @@ public class Minimax : MonoBehaviour
         {
             return evaluateScore(map.steps);
         }
+       // GameManager.Log("getMoveOptions: " + map.CurrentUnit + ", depth: " + depth);
         List<Position> options = map.GetMoveOptions(map.CurrentUnit);
-
         if (maxPlayer)
         {
             double bestScore = double.MinValue;
             Position bestMove = options[0];
             foreach (Position option in options)
             {
+                //GameManager.Log("\t\tMove: " + map.CurrentUnit + ", moveTo: " + option.x + ", " + option.y );
                 map.doMove(option, map.CurrentUnit);
                 double score = MinMax_R(map, false, depth - 1, alpha, beta);
                 //if (depth == maxDepth)
@@ -91,7 +92,7 @@ public class Minimax : MonoBehaviour
             totalScore = totalScore + step.score;
         }
 
-        GameManager.Log(totalScore.ToString());
+        //GameManager.Log(totalScore.ToString());
 
         //if (GameManager._isDebugModeOn)
         //{

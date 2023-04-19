@@ -22,52 +22,21 @@ namespace Assets.Scripts.Game
             }
         }
 
-        public int GetCurrentOrNextAlive(Team team)
-        {
-            if (team == Team.AI)
-            {
-                if (HasTeamLivingUnits(team))
-                {
-                    int i = currentAIId;
-                    while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].VIsDead)
-                    {
-                        if (i >= maxAIId)
-                        {
-                            i = 0;
-                        }
-                        else
-                        {
-                            i++;
-                        }
-                    }
-                    return i;
-                }
-            }
-            else if (team == Team.Player)
-            {
-                if (HasTeamLivingUnits(team))
-                {
-                    int i = currentPlayerId;
-                    while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead)
-                    {
-                        if (i >= maxPlayerId)
-                        {
-                            i = 0;
-                        }
-                        else
-                        {
-                            i++;
-                        }
-                    }
-                    currentPlayerId = i;
-                    return i;
-                }
-            }
-
-            return 0;
-        }
+        
         public TileMap originalMap;
-        public int currentAIId;
+        public int currentAIId 
+        {
+            get
+            {
+                return _currentAIId;
+            }
+            set
+            {
+                //GameManager.Log("\t\t\t\tsetCurrentId: " + _currentAIId + " -> " + value);
+                _currentAIId = value;
+            }
+        }
+        private int _currentAIId;
         public int currentPlayerId;
         public Dictionary<int, UnitScript> idsToPlayerUnits = new Dictionary<int, UnitScript>();
         public Dictionary<int, UnitScript> idsToAIUnits = new Dictionary<int, UnitScript>();
@@ -119,6 +88,51 @@ namespace Assets.Scripts.Game
             this.currentAIId = selectedAINumber;
             this.currentPlayerId = selectedPlayerNumber;
             this.currentTeam = Team.AI;
+        }
+
+        public int GetCurrentOrNextAlive(Team team)
+        {
+            if (team == Team.AI)
+            {
+                if (HasTeamLivingUnits(team))
+                {
+                    int i = currentAIId;
+                    while (!idsToAIUnits.ContainsKey(i) || idsToAIUnits[i].VIsDead)
+                    {
+                        if (i >= maxAIId)
+                        {
+                            i = 0;
+                        }
+                        else
+                        {
+                            i++;
+                        }
+                    }
+                    return i;
+                }
+            }
+            else if (team == Team.Player)
+            {
+                if (HasTeamLivingUnits(team))
+                {
+                    int i = currentPlayerId;
+                    while (!idsToPlayerUnits.ContainsKey(i) || idsToPlayerUnits[i].VIsDead)
+                    {
+                        if (i >= maxPlayerId)
+                        {
+                            i = 0;
+                        }
+                        else
+                        {
+                            i++;
+                        }
+                    }
+                    currentPlayerId = i;
+                    return i;
+                }
+            }
+
+            throw new Exception("GetCurrentOrNextAlive: Nincs current unit!");
         }
 
         public void doMove(Position move, UnitScript unit)
@@ -277,7 +291,7 @@ namespace Assets.Scripts.Game
             {
                 if (target.VIsDead)
                 {
-                    return -10;
+                    return -unit.attackDamage - 10;
                 }
                 return -unit.attackDamage;
             }
@@ -285,7 +299,7 @@ namespace Assets.Scripts.Game
             {
                 if (target.VIsDead)
                 {
-                    return 10;
+                    return unit.attackDamage + 10;
                 }
                 return unit.attackDamage;
             }
@@ -359,6 +373,7 @@ namespace Assets.Scripts.Game
             }
             else if (lastStep.type == Step.Type.Attack && lastState.healthPoint <= 0)
             {
+                //GameManager.Log("Reborn: " + lastStep.changingUnit + ", position: " + currentState.x + ", " + currentState.y);
                 table[currentState.x, currentState.y] = lastStep.changingUnit;
             }
             PreviousTurn();
@@ -367,13 +382,14 @@ namespace Assets.Scripts.Game
         public void VirtualAttack(UnitScript attackerUnit, UnitScript targetUnit)
         {
             int attackerDmg = attackerUnit.attackDamage;
-
+            //GameManager.Log("Attacker: " + attackerUnit + ", target: " + targetUnit);
             UnitState lastEnemyState = targetUnit.states.Peek();
             UnitState newEnemyState = new UnitState(lastEnemyState);
             newEnemyState.healthPoint = Mathf.Max(0, lastEnemyState.healthPoint - attackerDmg);
             targetUnit.states.Push(newEnemyState);
             if (newEnemyState.healthPoint <= 0)
             {
+                //GameManager.Log("Death: " + targetUnit + ", position: " + lastEnemyState.x + ", " + lastEnemyState.y);
                 table[newEnemyState.x, newEnemyState.y] = null;
             }
         }
