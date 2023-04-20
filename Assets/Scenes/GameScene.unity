@@ -208,6 +208,10 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Untagged
       objectReference: {fileID: 0}
+    - target: {fileID: 4638301988939886388, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: a632b05c20925b04f82ba8285324f496, type: 2}
     - target: {fileID: 7161020086859427456, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
       propertyPath: m_RootOrder
       value: 0
@@ -258,7 +262,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
       propertyPath: visualMovementSpeed
-      value: 0.5
+      value: 0.0125
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002943, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
       propertyPath: m_Name
@@ -619,7 +623,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
       propertyPath: visualMovementSpeed
-      value: 0.5
+      value: 0.0125
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002943, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
       propertyPath: m_Name
@@ -763,7 +767,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
       propertyPath: visualMovementSpeed
-      value: 0.5
+      value: 0.0125
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002943, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
       propertyPath: m_Name
@@ -1070,6 +1074,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   GM: {fileID: 1832099943}
+  battleStatus: 0
+  attackTime: 1
 --- !u!114 &1832099947
 MonoBehaviour:
   m_ObjectHideFlags: 0

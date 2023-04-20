@@ -8,26 +8,33 @@ public class BattleManager : MonoBehaviour
 {
     public GameManager GM;
 
-    private bool battleStatus = false;
+    public bool battleStatus = false;
 
-    //attacker: támadó fél, receiver:védekezõ fél
+    public float attackTime = 1.0f;
+
+    private float attackTimer = 0.0f;
+
     public IEnumerator Attack(GameObject unit, GameObject enemy, Action callBack)
     {
         battleStatus = true;
-
-        //Támadás animációk
-        while (battleStatus)
+        attackTimer = 0.0f;
+        //támadás animáció indítás
+        unit.GetComponent<UnitScript>().animator.SetTrigger("Attack");
+        GameManager.Log("Támadás indítása");
+        while (attackTimer <= attackTime)
         {
-            //Damage kiírás animációk
-            Battle(unit, enemy);
+            attackTimer += Time.deltaTime;
             yield return new WaitForEndOfFrame();
         }
+        GameManager.Log("Támadás befejezése");
+        //unit.GetComponent<UnitScript>().animator.ResetTrigger("Attack");
+        battleStatus = false;
+        Battle(unit, enemy);
         callBack();
     }
 
     public void Battle(GameObject attacker, GameObject receiver)
     {
-        battleStatus = true;
         var attackerUnit = attacker.GetComponent<UnitScript>();
         var receiverUnit = receiver.GetComponent<UnitScript>();
         int attackerDmg = attackerUnit.attackDamage;
@@ -35,14 +42,9 @@ public class BattleManager : MonoBehaviour
         receiverUnit.GetDamage(attackerDmg);
         if (checkIfUnitIsDead(receiver))
         {
-            //receiver.transform.parent = null;
-            
             receiverUnit.UnitDie();
-            battleStatus = false;
             GM.cechkIfUnitsRemain(attacker, receiver);
-            return;
         }
-        battleStatus = false;
     }
 
     

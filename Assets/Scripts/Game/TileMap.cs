@@ -94,7 +94,7 @@ public class TileMap : MonoBehaviour
             return;
         }
 
-        if (isGameOver || inMoving)
+        if (isGameOver || inMoving || BM.battleStatus)
         {
             return;
         }

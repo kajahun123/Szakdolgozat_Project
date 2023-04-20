@@ -28,6 +28,7 @@ public class UnitScript : MonoBehaviour
     public int currentHealthPoints;
     public Sprite unitSprite;
     public GameObject model;
+    public Animator animator;
 
     public bool IsDead
     {
@@ -119,6 +120,7 @@ public class UnitScript : MonoBehaviour
         }
 
         model = gameObject.transform.GetChild(0).gameObject;
+        animator = model.GetComponent<Animator>();
     }
 
     public void LateUpdate()
