@@ -27,6 +27,7 @@ public class UnitScript : MonoBehaviour
     public int maxHealthPoints = 5;
     public int currentHealthPoints;
     public Sprite unitSprite;
+    public GameObject model;
 
     public bool IsDead
     {
@@ -116,6 +117,8 @@ public class UnitScript : MonoBehaviour
             id = nextAvailableAIId;
             ++nextAvailableAIId;
         }
+
+        model = gameObject.transform.GetChild(0).gameObject;
     }
 
     public void LateUpdate()
@@ -170,7 +173,7 @@ public class UnitScript : MonoBehaviour
 
     bool NeedToRotate(Quaternion rotationToTarget)
     {
-        float diffAngle = Quaternion.Angle(rotationToTarget, transform.rotation);
+        float diffAngle = Quaternion.Angle(rotationToTarget, model.transform.rotation);
         return diffAngle > 0.001f;
     }
     public IEnumerator MoveOverSeconds(GameObject objectToMove, Node endNode, Action callBack)
@@ -181,8 +184,9 @@ public class UnitScript : MonoBehaviour
         while (path.Count != 0)
         {
             Vector3 endPos = map.tileCoordinateToWorldCoordinate(path[0].x, path[0].y);
-            Vector3 direction = (endPos - transform.position).normalized;
-            float startAngle = Mathf.Atan2(transform.forward.z, transform.forward.x) * Mathf.Rad2Deg;
+
+            Vector3 direction = (endPos - model.transform.position).normalized;
+            float startAngle = Mathf.Atan2(model.transform.forward.z, model.transform.forward.x) * Mathf.Rad2Deg;
             float angle = Mathf.Atan2(direction.z, direction.x) * Mathf.Rad2Deg;
             angle -= startAngle;
             float startAxisAngle = -(startAngle - 90);
@@ -191,9 +195,10 @@ public class UnitScript : MonoBehaviour
             Quaternion rotationToTarget = Quaternion.AngleAxis(finalAxisAngle, Vector3.up);
             while (NeedToRotate(rotationToTarget))
             {
-                transform.rotation = Quaternion.Lerp(transform.rotation, rotationToTarget, rotationSpeed);
+                model.transform.rotation = Quaternion.Lerp(model.transform.rotation, rotationToTarget, rotationSpeed);
                 yield return new WaitForEndOfFrame();
             }
+
             while (!((transform.position - endPos).sqrMagnitude < 0.001f))
             {
                 objectToMove.transform.position = Vector3.Lerp(transform.position, endPos, visualMovementSpeed);

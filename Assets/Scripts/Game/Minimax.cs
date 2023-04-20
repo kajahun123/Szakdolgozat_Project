@@ -29,6 +29,7 @@ public class Minimax : MonoBehaviour
         }
        // GameManager.Log("getMoveOptions: " + map.CurrentUnit + ", depth: " + depth);
         List<Position> options = map.GetMoveOptions(map.CurrentUnit);
+        int actualCurrentUnitId = map.CurrentUnit.id;
         if (maxPlayer)
         {
             double bestScore = double.MinValue;
@@ -37,12 +38,24 @@ public class Minimax : MonoBehaviour
             {
                 //GameManager.Log("\t\tMove: " + map.CurrentUnit + ", moveTo: " + option.x + ", " + option.y );
                 map.doMove(option, map.CurrentUnit);
-                double score = MinMax_R(map, false, depth - 1, alpha, beta);
+                if (actualCurrentUnitId == map.currentAIId && map.idsToAIUnits.Count(pair => !pair.Value.VIsDead) > 1)
+                {
+                    GameManager.Log("Do move didnt change current id!");
+                }
+                    double score = MinMax_R(map, false, depth - 1, alpha, beta);
                 //if (depth == maxDepth)
                 //{
                 //    GameManager.LogState(depth, map.idsToAIUnits[0], score);
                 //}
+
                 map.redoMove();
+
+                //Quickfix
+                if (actualCurrentUnitId != map.CurrentUnit.id)
+                {
+                    map.currentAIId = actualCurrentUnitId;
+                }
+
                 if (bestScore < score)
                 {
                     bestScore = score;
@@ -69,6 +82,13 @@ public class Minimax : MonoBehaviour
                 map.doMove(option, map.CurrentUnit);
                 double score = MinMax_R(map, true, depth - 1, alpha, beta);
                 map.redoMove();
+
+                //Quickfix
+                if (actualCurrentUnitId != map.CurrentUnit.id)
+                {
+                    map.currentPlayerId = actualCurrentUnitId;
+                }
+
                 bestScore = Math.Min(score, bestScore);
                 alpha = Math.Min(alpha, bestScore);
                 if (beta <= alpha)
