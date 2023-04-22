@@ -41,10 +41,12 @@ namespace Assets.Scripts.Game
         public int maxPlayerId;
         public int maxAIId;
         public Team currentTeam;
+        public bool[,] walkableTiles;
 
         public VirtualMap(TileMap map, int mapSizeX, int mapSizeY, int selectedAINumber, int selectedPlayerNumber)
         {
             this.originalMap = map;
+            walkableTiles = new bool[mapSizeX,mapSizeY];
             table = new UnitScript[mapSizeX, mapSizeY];
             for (int x = 0; x < mapSizeX; x++)
             {
@@ -52,6 +54,7 @@ namespace Assets.Scripts.Game
                 {
                     GameObject tile = map.tilesOnMap[x, y];
                     ClickableTile clickableTile = tile.GetComponent<ClickableTile>();
+                    walkableTiles[x, y] = clickableTile.isWalkable;
                     if (clickableTile.unitOnTile)
                     {
                         table[x, y] = clickableTile.unitOnTile.GetComponent<UnitScript>();
@@ -283,13 +286,40 @@ namespace Assets.Scripts.Game
             return false;
         }
 
+        public int CountLivingUnits(Team team)
+        {
+            int count = 0;
+            if (team == Team.Player)
+            {
+                foreach (var idToPlayer in idsToPlayerUnits)
+                {
+                    if (!idToPlayer.Value.VIsDead)
+                    {
+                        count++;
+                    }
+                }
+            }
+            else
+            {
+                foreach (var idToAi in idsToAIUnits)
+                {
+                    if (!idToAi.Value.VIsDead)
+                    {
+                        count++;
+                    }
+                }
+            }
+
+            return count;
+        }
+
         public int GetScoreByDamage(UnitScript unit, UnitScript target)
         {
             if (unit.team == Team.Player)
             {
-                if (target.VIsDead)
+                if (target.VIsDead && CountLivingUnits(Team.AI) > 0)
                 {
-                    return -unit.attackDamage - 10;
+                    return -unit.attackDamage - 30;
                 }
                 return -unit.attackDamage;
             }
@@ -297,7 +327,7 @@ namespace Assets.Scripts.Game
             {
                 if (target.VIsDead)
                 {
-                    return unit.attackDamage + 10;
+                    return unit.attackDamage + 30;
                 }
                 return unit.attackDamage;
             }
@@ -395,7 +425,7 @@ namespace Assets.Scripts.Game
             {
                 return false;
             }
-            return originalMap.tilesOnMap[x, y].GetComponent<ClickableTile>().isWalkable;
+            return walkableTiles[x, y];
         }
 
         public bool IsEnemyOnField(UnitScript unit, int x, int y)
