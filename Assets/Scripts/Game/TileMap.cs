@@ -117,8 +117,7 @@ public class TileMap : MonoBehaviour
             else if (selectedUnit.GetComponent<UnitScript>().unitMovementState == selectedUnit.GetComponent<UnitScript>().GetMovementState(1)
                 && selectedUnit.GetComponent<UnitScript>().movementQueue.Count == 0)
             {
-                disableHighlightCurrentUnit();
-                disableHighlightMovementRange();
+                
                 selectTileToDoAction();
             }
         }
@@ -371,6 +370,8 @@ public class TileMap : MonoBehaviour
                     UnitScript unit = selectedUnit.GetComponent<UnitScript>();
                     if ((hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile == null || hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile == selectedUnit) && (selectedUnitMoveRange.Contains(nodeToCeck)))
                     {
+                        disableHighlightCurrentUnit();
+                        disableHighlightMovementRange();
                         generatePathTo(clickedTileX, clickedTileY);
                         moveUnit(finalizeMovementPosition);
                     }
@@ -378,11 +379,15 @@ public class TileMap : MonoBehaviour
                     {
                         if (hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile.GetComponent<UnitScript>().currentHealthPoints > 0)
                         {
+                            disableHighlightCurrentUnit();
+                            disableHighlightMovementRange();
                             StartCoroutine(BM.Attack(selectedUnit, hit.transform.gameObject.GetComponent<ClickableTile>().unitOnTile, finalizeMovementPosition));
                         }
                     }
                     else if (unit.x == clickedTileX && unit.y == clickedTileY)
                     {
+                        disableHighlightCurrentUnit();
+                        disableHighlightMovementRange();
                         generatePathTo(clickedTileX, clickedTileY);
                         moveUnit(finalizeMovementPosition);
                     }
@@ -398,11 +403,15 @@ public class TileMap : MonoBehaviour
                     {
                         if (unitClicked.GetComponent<UnitScript>().currentHealthPoints > 0)
                         {
+                            disableHighlightCurrentUnit();
+                            disableHighlightMovementRange();
                             StartCoroutine(BM.Attack(selectedUnit, unitClicked, finalizeMovementPosition));
                         }
                     }
                     else if (unit.x == unitX && unit.y == unitY)
                     {
+                        disableHighlightCurrentUnit();
+                        disableHighlightMovementRange();
                         generatePathTo(unitX, unitY);
                         moveUnit(finalizeMovementPosition);
                     }
