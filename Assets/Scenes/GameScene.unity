@@ -183,8 +183,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2473645985043914799, guid: b1a4f06590002be43b7ebd564ef627d8, type: 3}
+      propertyPath: movementTimer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2473645985043914799, guid: b1a4f06590002be43b7ebd564ef627d8, type: 3}
       propertyPath: rotationSpeed
       value: 0.025
+      objectReference: {fileID: 0}
+    - target: {fileID: 2473645985043914799, guid: b1a4f06590002be43b7ebd564ef627d8, type: 3}
+      propertyPath: movementDuration
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 2473645985043914799, guid: b1a4f06590002be43b7ebd564ef627d8, type: 3}
       propertyPath: rotationDuration
@@ -265,8 +273,20 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
+      propertyPath: movementTimer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
       propertyPath: rotationSpeed
       value: 0.025
+      objectReference: {fileID: 0}
+    - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
+      propertyPath: maxHealthPoints
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
+      propertyPath: movementDuration
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
       propertyPath: rotationDuration
@@ -343,8 +363,20 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2473645985043914799, guid: b1a4f06590002be43b7ebd564ef627d8, type: 3}
+      propertyPath: movementTimer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2473645985043914799, guid: b1a4f06590002be43b7ebd564ef627d8, type: 3}
       propertyPath: rotationSpeed
       value: 0.025
+      objectReference: {fileID: 0}
+    - target: {fileID: 2473645985043914799, guid: b1a4f06590002be43b7ebd564ef627d8, type: 3}
+      propertyPath: maxHealthPoints
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2473645985043914799, guid: b1a4f06590002be43b7ebd564ef627d8, type: 3}
+      propertyPath: movementDuration
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 2473645985043914799, guid: b1a4f06590002be43b7ebd564ef627d8, type: 3}
       propertyPath: rotationDuration
@@ -642,8 +674,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
+      propertyPath: movementTimer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
       propertyPath: rotationSpeed
       value: 0.025
+      objectReference: {fileID: 0}
+    - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
+      propertyPath: movementDuration
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
       propertyPath: rotationDuration
@@ -656,6 +696,10 @@ PrefabInstance:
     - target: {fileID: 7161020087466002943, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
       propertyPath: m_Name
       value: Unit 1 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7161020087466002943, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
@@ -724,8 +768,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2473645985043914799, guid: b1a4f06590002be43b7ebd564ef627d8, type: 3}
+      propertyPath: movementTimer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2473645985043914799, guid: b1a4f06590002be43b7ebd564ef627d8, type: 3}
       propertyPath: rotationSpeed
       value: 0.025
+      objectReference: {fileID: 0}
+    - target: {fileID: 2473645985043914799, guid: b1a4f06590002be43b7ebd564ef627d8, type: 3}
+      propertyPath: movementDuration
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 2473645985043914799, guid: b1a4f06590002be43b7ebd564ef627d8, type: 3}
       propertyPath: rotationDuration
@@ -802,8 +854,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
+      propertyPath: movementTimer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
       propertyPath: rotationSpeed
       value: 0.025
+      objectReference: {fileID: 0}
+    - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
+      propertyPath: movementDuration
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 7161020087466002928, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
       propertyPath: rotationDuration
@@ -816,6 +876,10 @@ PrefabInstance:
     - target: {fileID: 7161020087466002943, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
       propertyPath: m_Name
       value: Unit 1 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7161020087466002943, guid: 7ddf2513bea90a0499802269e0931853, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7ddf2513bea90a0499802269e0931853, type: 3}

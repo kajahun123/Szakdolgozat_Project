@@ -13,11 +13,13 @@ public class UnitScript : MonoBehaviour
     public int x;
     public int y;
 
-    public float visualMovementSpeed = .15f;
+    public float movementDuration = 0.5f;
+
+    private float movementTimer;
 
     public float rotationDuration = 0.5f;
 
-    private float rotationTimer = 0.0f;
+    private float rotationTimer;
 
     public GameObject tileBeingOccupied;
 
@@ -190,13 +192,7 @@ public class UnitScript : MonoBehaviour
 
             yield return Rotate(endPos);
 
-            animator.SetTrigger("Move");
-            while (!((transform.position - endPos).sqrMagnitude < 0.001f))
-            {
-                objectToMove.transform.position = Vector3.Lerp(transform.position, endPos, visualMovementSpeed);
-                yield return new WaitForEndOfFrame();
-            }
-            animator.SetTrigger("EndMove");
+            yield return Move(objectToMove, endPos);
 
             path.RemoveAt(0);
 
@@ -209,6 +205,21 @@ public class UnitScript : MonoBehaviour
         tileBeingOccupied = map.tilesOnMap[x, y];
         movementQueue.Dequeue();
         callBack();
+    }
+
+    public IEnumerator Move(GameObject objectToMove, Vector3 endPos)
+    {
+        movementTimer = 0.0f;
+        animator.SetTrigger("Move");
+        while (!((transform.position - endPos).sqrMagnitude < 0.001f))
+        {
+            movementTimer += Time.deltaTime;
+            float ratio = movementTimer / movementDuration;
+            objectToMove.transform.position = Vector3.Lerp(transform.position, endPos, ratio);
+            //yield return new WaitForEndOfFrame();
+            yield return null;
+        }
+        animator.SetTrigger("EndMove");
     }
 
     public IEnumerator Rotate(Vector3 endPos)
