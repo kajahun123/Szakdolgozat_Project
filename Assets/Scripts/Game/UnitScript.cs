@@ -165,7 +165,7 @@ public class UnitScript : MonoBehaviour
 
     public void MoveToNextTile(Action callBack)
     {
-        if (path.Count == 0)
+        if (path == null || path.Count == 0)
         {
             callBack();
         }
