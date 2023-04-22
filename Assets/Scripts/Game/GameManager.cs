@@ -38,6 +38,7 @@ public class GameManager : MonoBehaviour
     public int playerCount;
     public int enemyCount;
 
+
     public void Awake()
     {
         UnitScript.nextAvailablePlayerId = 0;
@@ -301,7 +302,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public bool IsGameOver()
+    public GameState IsGameOver()
     {
         bool teamHasUnit = false;
         foreach (var idToPlayer in idsToPlayerUnits)
@@ -315,18 +316,18 @@ public class GameManager : MonoBehaviour
 
         if (!teamHasUnit)
         {
-            return true;
+            return GameState.Lose;
         }
 
         foreach (var idToAi in idsToAIUnits)
         {
             if (!idToAi.Value.IsDead)
             {
-                return false;
+                return GameState.InGame;
             }
         }
 
-        return true;
+        return GameState.Win;
     }
 
 

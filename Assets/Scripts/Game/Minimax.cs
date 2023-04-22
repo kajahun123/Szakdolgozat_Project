@@ -25,7 +25,11 @@ public class Minimax : MonoBehaviour
     {
         if (depth == 0 || map.IsGameOver())
         {
-            return evaluateScore(map.steps);
+            if (map.IsGameOver())
+            {
+                
+            }
+            return evaluateScore(map);
         }
        // GameManager.Log("getMoveOptions: " + map.CurrentUnit + ", depth: " + depth);
         List<Position> options = map.GetMoveOptions(map.CurrentUnit);
@@ -101,22 +105,23 @@ public class Minimax : MonoBehaviour
         }
     }
 
-    private double evaluateScore(Stack<Step> steps)
+    private double evaluateScore(VirtualMap map)
     {
         double totalScore = 0;
 
         //damage +
         //kapott damage -
-        foreach (Step step in steps)
+        foreach (Step step in map.steps)
         {
             totalScore = totalScore + step.score;
         }
 
-        //GameManager.Log(totalScore.ToString());
-
-        //if (GameManager._isDebugModeOn)
+        //if (!map.HasTeamLivingUnits(Team.Player)){
+        //    totalScore = totalScore + 10000;
+        //}
+        //else if (!map.HasTeamLivingUnits(Team.AI))
         //{
-        //    lastSteps = new List<Step>(steps);
+        //    totalScore = totalScore - 10000;
         //}
 
         return totalScore;

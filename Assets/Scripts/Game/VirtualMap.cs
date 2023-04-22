@@ -17,7 +17,6 @@ namespace Assets.Scripts.Game
         {
             get
             {
-                //getCurrentOrNextAlive(team)
                 return currentTeam == Team.Player ? idsToPlayerUnits[GetCurrentOrNextAlive(Team.Player)] : idsToAIUnits[GetCurrentOrNextAlive(Team.AI)];
             }
         }

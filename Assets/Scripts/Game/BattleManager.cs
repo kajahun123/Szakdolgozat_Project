@@ -18,16 +18,15 @@ public class BattleManager : MonoBehaviour
     {
         battleStatus = true;
         attackTimer = 0.0f;
+        yield return unit.GetComponent<UnitScript>().Rotate(enemy.transform.position);
         //támadás animáció indítás
         unit.GetComponent<UnitScript>().animator.SetTrigger("Attack");
-        GameManager.Log("Támadás indítása");
         while (attackTimer <= attackTime)
         {
             attackTimer += Time.deltaTime;
             yield return new WaitForEndOfFrame();
         }
-        GameManager.Log("Támadás befejezése");
-        //unit.GetComponent<UnitScript>().animator.ResetTrigger("Attack");
+        unit.GetComponent<UnitScript>().animator.SetTrigger("EndAttack");
         battleStatus = false;
         Battle(unit, enemy);
         callBack();

@@ -15,7 +15,9 @@ public class UnitScript : MonoBehaviour
 
     public float visualMovementSpeed = .15f;
 
-    public float rotationSpeed = 0.5f;
+    public float rotationDuration = 0.5f;
+
+    private float rotationTimer = 0.0f;
 
     public GameObject tileBeingOccupied;
 
@@ -187,25 +189,15 @@ public class UnitScript : MonoBehaviour
         {
             Vector3 endPos = map.tileCoordinateToWorldCoordinate(path[0].x, path[0].y);
 
-            Vector3 direction = (endPos - model.transform.position).normalized;
-            float startAngle = Mathf.Atan2(model.transform.forward.z, model.transform.forward.x) * Mathf.Rad2Deg;
-            float angle = Mathf.Atan2(direction.z, direction.x) * Mathf.Rad2Deg;
-            angle -= startAngle;
-            float startAxisAngle = -(startAngle - 90);
-            GameManager.Log("Angle: " + angle + ", Direction: " + direction );
-            float finalAxisAngle = startAxisAngle + angle * -1;
-            Quaternion rotationToTarget = Quaternion.AngleAxis(finalAxisAngle, Vector3.up);
-            while (NeedToRotate(rotationToTarget))
-            {
-                model.transform.rotation = Quaternion.Lerp(model.transform.rotation, rotationToTarget, rotationSpeed);
-                yield return new WaitForEndOfFrame();
-            }
+            yield return Rotate(endPos);
 
+            animator.SetTrigger("Move");
             while (!((transform.position - endPos).sqrMagnitude < 0.001f))
             {
                 objectToMove.transform.position = Vector3.Lerp(transform.position, endPos, visualMovementSpeed);
                 yield return new WaitForEndOfFrame();
             }
+            animator.SetTrigger("EndMove");
 
             path.RemoveAt(0);
 
@@ -218,6 +210,28 @@ public class UnitScript : MonoBehaviour
         tileBeingOccupied = map.tilesOnMap[x, y];
         movementQueue.Dequeue();
         callBack();
+    }
+
+    public IEnumerator Rotate(Vector3 endPos)
+    {
+        rotationTimer = 0.0f;
+        Vector3 direction = (endPos - model.transform.position).normalized;
+        float startAngle = Mathf.Atan2(model.transform.forward.z, model.transform.forward.x) * Mathf.Rad2Deg;
+        float angle = Mathf.Atan2(direction.z, direction.x) * Mathf.Rad2Deg;
+        angle -= startAngle;
+        float startAxisAngle = -(startAngle - 90);
+        GameManager.Log("Angle: " + angle + ", Direction: " + direction);
+        float finalAxisAngle = startAxisAngle + angle * -1;
+        Quaternion rotationToTarget = Quaternion.AngleAxis(finalAxisAngle, Vector3.up);
+        animator.SetTrigger("Rotate");
+        while (NeedToRotate(rotationToTarget))
+        {
+            rotationTimer += Time.deltaTime;
+            float ratio = rotationTimer / rotationDuration; 
+            model.transform.rotation = Quaternion.Lerp(model.transform.rotation, rotationToTarget, ratio);
+            yield return new WaitForEndOfFrame();
+        }
+        animator.SetTrigger("EndRotate");
     }
 
     public void GetDamage(int damage)
