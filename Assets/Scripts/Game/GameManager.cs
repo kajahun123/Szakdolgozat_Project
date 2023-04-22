@@ -206,7 +206,6 @@ public class GameManager : MonoBehaviour
             }
             currentPlayerId = i;
             TM.SelectUnit(idsToPlayerUnits[currentPlayerId].gameObject);
-            //átadni a tileMapnak az id-t
         }
         else if (currentTeam == Team.Player)
         {
@@ -225,7 +224,6 @@ public class GameManager : MonoBehaviour
             }
             currentAIId = i;
             TM.SelectUnit(idsToAIUnits[currentAIId].gameObject);
-            //átadni a tileMapnak az id-t
         }
     }
 

@@ -31,7 +31,6 @@ public class Minimax : MonoBehaviour
             }
             return evaluateScore(map);
         }
-       // GameManager.Log("getMoveOptions: " + map.CurrentUnit + ", depth: " + depth);
         List<Position> options = map.GetMoveOptions(map.CurrentUnit);
         int actualCurrentUnitId = map.CurrentUnit.id;
         if (maxPlayer)
@@ -40,17 +39,8 @@ public class Minimax : MonoBehaviour
             Position bestMove = options[0];
             foreach (Position option in options)
             {
-                //GameManager.Log("\t\tMove: " + map.CurrentUnit + ", moveTo: " + option.x + ", " + option.y );
                 map.doMove(option, map.CurrentUnit);
-                if (actualCurrentUnitId == map.currentAIId && map.idsToAIUnits.Count(pair => !pair.Value.VIsDead) > 1)
-                {
-                    GameManager.Log("Do move didnt change current id!");
-                }
                     double score = MinMax_R(map, false, depth - 1, alpha, beta);
-                //if (depth == maxDepth)
-                //{
-                //    GameManager.LogState(depth, map.idsToAIUnits[0], score);
-                //}
 
                 map.redoMove();
 
@@ -109,20 +99,10 @@ public class Minimax : MonoBehaviour
     {
         double totalScore = 0;
 
-        //damage +
-        //kapott damage -
         foreach (Step step in map.steps)
         {
             totalScore = totalScore + step.score;
         }
-
-        //if (!map.HasTeamLivingUnits(Team.Player)){
-        //    totalScore = totalScore + 10000;
-        //}
-        //else if (!map.HasTeamLivingUnits(Team.AI))
-        //{
-        //    totalScore = totalScore - 10000;
-        //}
 
         return totalScore;
     }

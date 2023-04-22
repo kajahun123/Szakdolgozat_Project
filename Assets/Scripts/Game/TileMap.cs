@@ -10,7 +10,6 @@ using UnityEngine.SceneManagement;
 public class TileMap : MonoBehaviour
 {
 
-    //Cloneozható GameState
     public GameManager GM;
     public BattleManager BM;
 
@@ -140,7 +139,6 @@ public class TileMap : MonoBehaviour
                         tiles[x, y] = UnityEngine.Random.Range(0, 5) == 3 ? 1 : 0;
                     }
                 }
-                //tiles[x, y] = 0;
             }
         }
     }
@@ -168,10 +166,6 @@ public class TileMap : MonoBehaviour
                 GameObject gridUI = Instantiate(mapUI, new Vector3(x, 0.501f, y), Quaternion.Euler(90f, 0, 0));
                 gridUI.transform.SetParent(UIQuadPotentialMovesContainer.transform);
                 quadOnMap[x, y] = gridUI;
-                /* 
-                GameObject gridUIForPathfindingDisplay = Instantiate(mapUnitMovementUI, new Vector3(x, 0.502f, y), Quaternion.Euler(90f, 0, 0));
-                gridUIForPathfindingDisplay.transform.SetParent(UIUnitMovementPathContainer.transform);
-                quadOnMapForUnitMovement[x, y] = gridUIForPathfindingDisplay; */
 
                 GameObject gridUICursor = Instantiate(mapCursorUI, new Vector3(x, 0.503f, y), Quaternion.Euler(90f, 0, 0));
                 gridUICursor.transform.SetParent(UIQuadCursorContainer.transform);
@@ -290,28 +284,6 @@ public class TileMap : MonoBehaviour
         unitSelected = true;
         highlightUnitRange();
     }
-
-    //public IEnumerator moveUnitAndFinalize()
-    //{
-    //    while (selectedUnit.GetComponent<UnitScript>().movementQueue.Count != 0)
-    //    {
-    //        yield return new WaitForEndOfFrame();
-    //    }
-
-    //    finalizeMovementPosition();
-    //}
-
-    //public IEnumerator attackUnitAndFinalize()
-    //{
-    //    yield return new WaitForSeconds(.25f);
-    //    while (unit.GetComponent<UnitScript>().combatQueue.Count > 0)
-    //    {
-    //        yield return new WaitForEndOfFrame();
-    //    }
-
-    //    finalizeMovementPosition();
-    //}
-
     public void finalizeMovementPosition()
     {
         inMoving = false;
@@ -571,21 +543,14 @@ public class TileMap : MonoBehaviour
     {
         HashSet<Node> finalMovementHighlight = new HashSet<Node>();
         HashSet<Node> totalAttackableTiles = new HashSet<Node>();
-
-        //int attRange = selectedUnit.GetComponent<UnitScript>().attackRange;
-
-        //Node unitInitalNode = graph[selectedUnit.GetComponent<UnitScript>().x, selectedUnit.GetComponent<UnitScript>().y];
         finalMovementHighlight = getUnitMovementOptions();
-        //totalAttackableTiles = getUnitAttackOptions();
 
         highlightCurrentUnit();
         highlightMovementRange(finalMovementHighlight);
-        //highlightEnemiesInRange(totalAttackableTiles);
         highlightUnitAttackOption();
 
 
         selectedUnitMoveRange = finalMovementHighlight;
-        //selectedUnitAttackRange = totalAttackableTiles;
     }
 
     public void highlightCurrentUnit()

@@ -31,7 +31,6 @@ namespace Assets.Scripts.Game
             }
             set
             {
-                //GameManager.Log("\t\t\t\tsetCurrentId: " + _currentAIId + " -> " + value);
                 _currentAIId = value;
             }
         }
@@ -372,7 +371,6 @@ namespace Assets.Scripts.Game
             }
             else if (lastStep.type == Step.Type.Attack && lastState.healthPoint <= 0)
             {
-                //GameManager.Log("Reborn: " + lastStep.changingUnit + ", position: " + currentState.x + ", " + currentState.y);
                 table[currentState.x, currentState.y] = lastStep.changingUnit;
             }
             PreviousTurn();
@@ -381,14 +379,12 @@ namespace Assets.Scripts.Game
         public void VirtualAttack(UnitScript attackerUnit, UnitScript targetUnit)
         {
             int attackerDmg = attackerUnit.attackDamage;
-            //GameManager.Log("Attacker: " + attackerUnit + ", target: " + targetUnit);
             UnitState lastEnemyState = targetUnit.states.Peek();
             UnitState newEnemyState = new UnitState(lastEnemyState);
             newEnemyState.healthPoint = Mathf.Max(0, lastEnemyState.healthPoint - attackerDmg);
             targetUnit.states.Push(newEnemyState);
             if (newEnemyState.healthPoint <= 0)
             {
-                //GameManager.Log("Death: " + targetUnit + ", position: " + lastEnemyState.x + ", " + lastEnemyState.y);
                 table[newEnemyState.x, newEnemyState.y] = null;
             }
         }
