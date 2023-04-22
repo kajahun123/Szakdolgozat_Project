@@ -264,7 +264,6 @@ public class GameManager : MonoBehaviour
         {
             yield return new WaitForEndOfFrame();
         }
-        //Debug.Log("team: " + team1.transform.);
         bool playerTeamAlive = false;
         bool enemyTeamAlive = false;
         foreach (Transform u in playerTeam.transform)

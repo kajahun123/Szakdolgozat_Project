@@ -546,10 +546,11 @@ public class TileMap : MonoBehaviour
         finalMovementHighlight = getUnitMovementOptions();
 
         highlightCurrentUnit();
-        highlightMovementRange(finalMovementHighlight);
-        highlightUnitAttackOption();
-
-
+        if(selectedUnit.GetComponent<UnitScript>().team == Team.Player)
+        {
+            highlightMovementRange(finalMovementHighlight);
+            highlightUnitAttackOption();
+        }
         selectedUnitMoveRange = finalMovementHighlight;
     }
 
@@ -714,8 +715,6 @@ public class TileMap : MonoBehaviour
     public HashSet<Node> getActualMovementOptions(GameObject unit)
     {
         HashSet<Node> legalMoves = new HashSet<Node>();
-        Debug.Log("Selected unit: " + selectedUnit + ", x: " + selectedUnit.GetComponent<UnitScript>().y);
-        Debug.Log("unit: " + unit + ", x: " + unit.GetComponent<UnitScript>().y);
         Node unitInitialNode = graph[unit.GetComponent<UnitScript>().x, unit.GetComponent<UnitScript>().y];
         Node node;
         for (int x = 0; x < mapSizeX; x++)

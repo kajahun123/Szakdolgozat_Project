@@ -184,7 +184,6 @@ public class UnitScript : MonoBehaviour
     {
         movementQueue.Enqueue(1);
         path.RemoveAt(0);
-        GameManager.Log("Path count: " + path.Count);
         while (path.Count != 0)
         {
             Vector3 endPos = map.tileCoordinateToWorldCoordinate(path[0].x, path[0].y);
@@ -220,7 +219,6 @@ public class UnitScript : MonoBehaviour
         float angle = Mathf.Atan2(direction.z, direction.x) * Mathf.Rad2Deg;
         angle -= startAngle;
         float startAxisAngle = -(startAngle - 90);
-        GameManager.Log("Angle: " + angle + ", Direction: " + direction);
         float finalAxisAngle = startAxisAngle + angle * -1;
         Quaternion rotationToTarget = Quaternion.AngleAxis(finalAxisAngle, Vector3.up);
         animator.SetTrigger("Rotate");
