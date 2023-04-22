@@ -15,6 +15,10 @@ public class UnitScript : MonoBehaviour
 
     public float visualMovementSpeed = .15f;
 
+    public float rotationDuration = 0.5f;
+
+    private float rotationTimer = 0.0f;
+
     public GameObject tileBeingOccupied;
 
     [HideInInspector]
@@ -25,6 +29,8 @@ public class UnitScript : MonoBehaviour
     public int maxHealthPoints = 5;
     public int currentHealthPoints;
     public Sprite unitSprite;
+    public GameObject model;
+    public Animator animator;
 
     public bool IsDead
     {
@@ -109,11 +115,14 @@ public class UnitScript : MonoBehaviour
             id = nextAvailablePlayerId;
             ++nextAvailablePlayerId;
         }
-        else if(team == Team.AI)
+        else if (team == Team.AI)
         {
             id = nextAvailableAIId;
             ++nextAvailableAIId;
         }
+
+        model = gameObject.transform.GetChild(0).gameObject;
+        animator = model.GetComponent<Animator>();
     }
 
     public void LateUpdate()
@@ -127,11 +136,11 @@ public class UnitScript : MonoBehaviour
         {
             return MovementState.Unselected;
         }
-        if(i == 1)
+        if (i == 1)
         {
             return MovementState.Selected;
         }
-        if(i == 2)
+        if (i == 2)
         {
             return MovementState.Moved;
         }
@@ -146,7 +155,7 @@ public class UnitScript : MonoBehaviour
         }
         if (i == 1)
         {
-           unitMovementState =  MovementState.Selected;
+            unitMovementState = MovementState.Selected;
         }
         if (i == 2)
         {
@@ -156,31 +165,43 @@ public class UnitScript : MonoBehaviour
 
     public void MoveToNextTile(Action callBack)
     {
-        if(path.Count == 0)
+        if (path.Count == 0)
         {
             callBack();
         }
         else
         {
-            StartCoroutine(MoveOverSeconds(transform.gameObject, path[path.Count - 1],callBack));
+            StartCoroutine(MoveOverSeconds(transform.gameObject, path[path.Count - 1], callBack));
         }
     }
 
+    bool NeedToRotate(Quaternion rotationToTarget)
+    {
+        float diffAngle = Quaternion.Angle(rotationToTarget, model.transform.rotation);
+        return diffAngle > 0.001f;
+    }
     public IEnumerator MoveOverSeconds(GameObject objectToMove, Node endNode, Action callBack)
     {
         movementQueue.Enqueue(1);
         path.RemoveAt(0);
+        GameManager.Log("Path count: " + path.Count);
         while (path.Count != 0)
         {
             Vector3 endPos = map.tileCoordinateToWorldCoordinate(path[0].x, path[0].y);
-            objectToMove.transform.position = Vector3.Lerp(transform.position, endPos, visualMovementSpeed);
-            if((transform.position - endPos).sqrMagnitude < 0.001)
+
+            yield return Rotate(endPos);
+
+            animator.SetTrigger("Move");
+            while (!((transform.position - endPos).sqrMagnitude < 0.001f))
             {
-                path.RemoveAt(0);
+                objectToMove.transform.position = Vector3.Lerp(transform.position, endPos, visualMovementSpeed);
+                yield return new WaitForEndOfFrame();
             }
-            yield return new WaitForEndOfFrame();
+            animator.SetTrigger("EndMove");
+
+            path.RemoveAt(0);
+
         }
-        visualMovementSpeed = 0.15f;
         transform.position = map.tileCoordinateToWorldCoordinate(endNode.x, endNode.y);
 
         x = endNode.x;
@@ -191,6 +212,28 @@ public class UnitScript : MonoBehaviour
         callBack();
     }
 
+    public IEnumerator Rotate(Vector3 endPos)
+    {
+        rotationTimer = 0.0f;
+        Vector3 direction = (endPos - model.transform.position).normalized;
+        float startAngle = Mathf.Atan2(model.transform.forward.z, model.transform.forward.x) * Mathf.Rad2Deg;
+        float angle = Mathf.Atan2(direction.z, direction.x) * Mathf.Rad2Deg;
+        angle -= startAngle;
+        float startAxisAngle = -(startAngle - 90);
+        GameManager.Log("Angle: " + angle + ", Direction: " + direction);
+        float finalAxisAngle = startAxisAngle + angle * -1;
+        Quaternion rotationToTarget = Quaternion.AngleAxis(finalAxisAngle, Vector3.up);
+        animator.SetTrigger("Rotate");
+        while (NeedToRotate(rotationToTarget))
+        {
+            rotationTimer += Time.deltaTime;
+            float ratio = rotationTimer / rotationDuration; 
+            model.transform.rotation = Quaternion.Lerp(model.transform.rotation, rotationToTarget, ratio);
+            yield return new WaitForEndOfFrame();
+        }
+        animator.SetTrigger("EndRotate");
+    }
+
     public void GetDamage(int damage)
     {
         currentHealthPoints -= damage;
@@ -199,7 +242,7 @@ public class UnitScript : MonoBehaviour
 
     public void UnitDie()
     {
-       StartCoroutine(CechkIfRoutinesRunning());
+        StartCoroutine(CechkIfRoutinesRunning());
     }
 
     public IEnumerator CechkIfRoutinesRunning()

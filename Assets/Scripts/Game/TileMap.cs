@@ -87,14 +87,22 @@ public class TileMap : MonoBehaviour
 
     private void Update()
     {
-        if (GM.IsGameOver())
+        if (GM.IsGameOver() != GameState.InGame)
         {
             isGameOver = true;
-            SceneManager.LoadScene(0, LoadSceneMode.Single);
+            if(GM.IsGameOver() == GameState.Win)
+            {
+                SceneManager.LoadScene(3, LoadSceneMode.Single);
+            }
+            else
+            {
+                SceneManager.LoadScene(2, LoadSceneMode.Single);
+            }
+
             return;
         }
 
-        if (isGameOver || inMoving)
+        if (isGameOver || inMoving || BM.battleStatus)
         {
             return;
         }
@@ -130,7 +138,7 @@ public class TileMap : MonoBehaviour
                 {
                     if (tiles[x + 1, y] == 0 & tiles[x - 1, y] == 0 && tiles[x, y + 1] == 0 && tiles[x, y - 1] == 0)
                     {
-                        tiles[x, y] = UnityEngine.Random.Range(0, 2) == 0 ? 1 : 0;
+                        tiles[x, y] = UnityEngine.Random.Range(0, 5) == 3 ? 1 : 0;
                     }
                 }
                 //tiles[x, y] = 0;
@@ -316,7 +324,7 @@ public class TileMap : MonoBehaviour
         //Moved állapotba tesszük
         selectedUnit.GetComponent<UnitScript>().SetMovementState(2);
         deselectUnit();
-        if (!GM.IsGameOver())
+        if (GM.IsGameOver() == GameState.InGame)
         {
             GM.NextTurn();
         }
