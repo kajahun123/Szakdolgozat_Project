@@ -84,7 +84,7 @@ public class Minimax : MonoBehaviour
                 }
 
                 bestScore = Math.Min(score, bestScore);
-                alpha = Math.Min(alpha, bestScore);
+                beta = Math.Min(beta, bestScore);
                 if (beta <= alpha)
                 {
                     break;
