@@ -166,10 +166,7 @@ namespace Assets.Scripts.Game
                 throw new Exception("Cannot make a step!");
             }
 
-            //if (IsGameOver())
-            //{
             NextTurn();
-            //}
         }
 
         private void NextTurn()
