@@ -25,10 +25,6 @@ public class Minimax : MonoBehaviour
     {
         if (depth == 0 || map.IsGameOver())
         {
-            if (map.IsGameOver())
-            {
-                
-            }
             return evaluateScore(map);
         }
         List<Position> options = map.GetMoveOptions(map.CurrentUnit);
